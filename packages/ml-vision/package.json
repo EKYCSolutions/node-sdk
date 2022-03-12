@@ -1,0 +1,32 @@
+{
+  "name": "@ekycsolutions/ml-vision",
+  "version": "0.0.0",
+  "description": "ekycsolutions computer vision api",
+  "author": "ShadowLegend <lyheng0@gmail.com>",
+  "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "typings": "./src/index.d.ts",
+  "directories": {
+    "lib": "src",
+    "test": "__tests__"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "registry": "https://gitlab.com/api/v4/projects/22807607/packages/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/ekycsolutions/node-sdk.git"
+  },
+  "scripts": {
+    "tsc": "tsc",
+    "test": "yarn jest",
+    "clean": "rimraf dist"
+  },
+  "bugs": {
+    "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
+  }
+}

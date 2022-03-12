@@ -1,7 +1,7 @@
 {
-  "name": "@ekycsolutions/request-option",
+  "name": "@ekycsolutions/auth",
   "version": "0.0.0",
-  "description": "util to create http request option",
+  "description": "auth utils to access ekycsolutions api",
   "author": "ShadowLegend <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
   "license": "ISC",
@@ -23,9 +23,13 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "test": "yarn jest"
+    "test": "yarn jest",
+    "clean": "rimraf dist"
   },
   "bugs": {
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
+  },
+  "dependencies": {
+    "got": "^12.0.1"
   }
 }
