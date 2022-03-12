@@ -15,5 +15,8 @@
   "scripts": {
     "clean": "lerna run clean",
     "publish": "yarn clean && lerna run tsc && lerna publish"
+  },
+  "dependencies": {
+    "got": "^12.0.1"
   }
 }
