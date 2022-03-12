@@ -1,7 +1,7 @@
 {
-  "name": "@ekycsolutions/auth",
+  "name": "@ekycsolutions/client",
   "version": "0.0.0",
-  "description": "auth utils to access ekycsolutions api",
+  "description": "entrypoint, api client to interact with ekycsolutions api",
   "author": "ShadowLegend <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
   "license": "ISC",
@@ -28,5 +28,8 @@
   },
   "bugs": {
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
+  },
+  "dependencies": {
+    "@ekycsolutions/auth": "^0.0.0"
   }
 }
