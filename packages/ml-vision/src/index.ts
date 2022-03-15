@@ -10,8 +10,8 @@ export interface CommonMLVisionParams {
 }
 
 export interface FaceCompareParams extends CommonMLVisionParams {
-  face0Path: string;
-  face1Path: string;
+  face0Url: string;
+  face1Url: string;
 }
 
 export enum OcrObjectType {
@@ -30,7 +30,7 @@ export class MLVision {
   public async faceCompare({}: Readonly<FaceCompareParams>) {
   }
 
-  public async ocr({ imageUrl, isRaw, objectType }: Readonly<OcrParams>): Promise<ApiResult> {
+  public async ocr({ isRaw, imageUrl, objectType }: Readonly<OcrParams>): Promise<ApiResult> {
     const formData = new FormData();
 
     formData.append('is_raw', isRaw);
