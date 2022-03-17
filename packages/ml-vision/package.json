@@ -5,8 +5,12 @@
   "author": "ShadowLegend <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
   "license": "ISC",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "type": "module",
+  "typings": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "directories": {
     "lib": "src",
     "test": "__tests__"
@@ -23,8 +27,8 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "test": "yarn jest",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "test": "NODE_OPTIONS=--experimental-vm-modules yarn jest"
   },
   "bugs": {
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"

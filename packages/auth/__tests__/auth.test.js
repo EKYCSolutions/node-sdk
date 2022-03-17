@@ -1,7 +1,6 @@
-'use strict';
 
-const requestOption = require('../dist');
+import { Auth } from '../dist/index';
 
 describe('@ekycsolutions/request-option', () => {
-    it('needs tests');
+  it('needs tests', () => {});
 });

@@ -1,10 +1,12 @@
 {
   "name": "ekycsolutions",
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
+    "@types/jest": "^27.4.1",
     "@types/node": "^17.0.21",
     "jest": "^27.5.1",
     "lerna": "^4.0.0",
