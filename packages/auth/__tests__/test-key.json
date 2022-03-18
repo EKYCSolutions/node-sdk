@@ -1,0 +1,4 @@
+{
+  "private_key": "-----BEGIN PRIVATE KEY-----\nabc123\n-----END PRIVATE KEY-----",
+  "client_cert_url": "https://example.com/cert/abc123"
+}
