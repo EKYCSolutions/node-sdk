@@ -38,8 +38,8 @@ export class EkycClient {
 
     return new Options({
       responseType: 'json',
-      https: { ...authRequestOpts },
       prefixUrl: this.serverAddress,
+      https: { ...authRequestOpts, minVersion: 'TLSv1.3', rejectUnauthorized: true },
     });
   }
 
@@ -50,6 +50,8 @@ export class EkycClient {
 
     const mlRequestResult = await got(
       endpoint, requestOpts as OptionsOfJSONResponseBody).json<{ id: string; }>();
+
+
 
     if (mlRequestResult?.id) {
       return await this.apiResultPolling(mlRequestResult.id);
@@ -72,7 +74,10 @@ export class EkycClient {
     while (true) {
       try {
         const res =
-          await got(`${this.serverAddress}/v0/api-request-reply/${responseId}`, { responseType: 'json' }).json<ApiResultResponse>();
+          await got(
+            `v0/api-request-reply/${responseId}`,
+            { ...await this.getRequestOpts(), responseType: 'json' },
+          ).json<ApiResultResponse>();
 
         if (res?.ml_result) {
           return {
