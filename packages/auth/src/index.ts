@@ -2,27 +2,25 @@
 import { X509Certificate } from 'crypto';
 import { existsSync, readFileSync, createWriteStream } from 'fs';
 
-import got from 'got';
+import got, { HttpsOptions } from 'got';
 
 export interface AuthOptions {
   apiKeyPath: string;
+  caCertificatePath?: string;
   clientCertSavePath?: string;
-}
-
-interface AuthRequestOpts {
-  key: Buffer;
-  certificate: Buffer;
 }
 
 export class Auth {
   private readonly apiKeyPath: string;
+  readonly caCertificatePath: string;
   readonly clientCertSavePath: string;
   readonly clientCertDownloadUrl: string;
 
   clientCert: X509Certificate;
 
-  constructor({ apiKeyPath, clientCertSavePath }: Readonly<AuthOptions>) {
+  constructor({ apiKeyPath, caCertificatePath, clientCertSavePath }: Readonly<AuthOptions>) {
     this.apiKeyPath = apiKeyPath;
+    this.caCertificatePath = caCertificatePath;
 
     this.clientCertSavePath = clientCertSavePath ?? '/tmp/client.cert.pem';
 
@@ -30,7 +28,7 @@ export class Auth {
       JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).client_cert_url;
   }
 
-  public async getRequestOpts(): Promise<AuthRequestOpts> {
+  public async getRequestOpts(): Promise<HttpsOptions> {
     const x509Cert =
       this.isClientCertExpired()
         ? await this.downloadClientCert()
@@ -38,8 +36,9 @@ export class Auth {
 
     if (x509Cert?.serialNumber) {
       return {
-        certificate: x509Cert.raw,
+        certificate: x509Cert.toString(),
         key: JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).private_key,
+        certificateAuthority: this.caCertificatePath ? readFileSync(this.caCertificatePath) : undefined,
       };
     }
   }
