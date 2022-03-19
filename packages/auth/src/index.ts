@@ -1,28 +1,33 @@
 
+import { TextDecoder } from 'util';
 import { X509Certificate } from 'crypto';
-import { existsSync, readFileSync, createWriteStream } from 'fs';
+import { existsSync, readFileSync, createWriteStream, writeFileSync } from 'fs';
 
+import * as jose from 'jose';
 import got, { HttpsOptions } from 'got';
 
 export interface AuthOptions {
   apiKeyPath: string;
   caCertificatePath?: string;
   clientCertSavePath?: string;
+  clientCertKeySavePath?: string;
 }
 
 export class Auth {
   private readonly apiKeyPath: string;
   readonly caCertificatePath: string;
   readonly clientCertSavePath: string;
+  readonly clientCertKeySavePath: string;
   readonly clientCertDownloadUrl: string;
 
   clientCert: X509Certificate;
 
-  constructor({ apiKeyPath, caCertificatePath, clientCertSavePath }: Readonly<AuthOptions>) {
+  constructor({ apiKeyPath, caCertificatePath, clientCertSavePath, clientCertKeySavePath }: Readonly<AuthOptions>) {
     this.apiKeyPath = apiKeyPath;
     this.caCertificatePath = caCertificatePath;
 
     this.clientCertSavePath = clientCertSavePath ?? '/tmp/client.cert.pem';
+    this.clientCertKeySavePath = clientCertKeySavePath ?? '/tmp/client.key.pem';
 
     this.clientCertDownloadUrl =
       JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).client_cert_url;
@@ -37,7 +42,7 @@ export class Auth {
     if (x509Cert?.serialNumber) {
       return {
         certificate: x509Cert.toString(),
-        key: JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).private_key,
+        key: readFileSync(this.clientCertKeySavePath),
         certificateAuthority: this.caCertificatePath ? readFileSync(this.caCertificatePath) : undefined,
       };
     }
@@ -45,7 +50,7 @@ export class Auth {
 
   public downloadClientCert(): Promise<X509Certificate> {
     return new Promise((resolve, reject) => {
-      const writeStream = createWriteStream(this.clientCertSavePath, { flags: 'w' });
+      const writeStream = createWriteStream('/tmp/cert-content', { flags: 'w' });
 
       const downloadStream = got.stream(this.clientCertDownloadUrl);
 
@@ -57,7 +62,17 @@ export class Auth {
         reject(err);
       });
 
-      downloadStream.on('finish', () => {
+      downloadStream.on('finish', async () => {
+        const { plaintext } = await jose.compactDecrypt(
+          readFileSync('/tmp/cert-cotent').toString('utf8'),
+          await jose.importPKCS8(JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).private_key, 'X25519')
+        );
+
+        const keyCert = JSON.parse(new TextDecoder().decode(plaintext));
+
+        writeFileSync(this.clientCertSavePath, keyCert.cert, { flag: 'w' });
+        writeFileSync(this.clientCertKeySavePath, keyCert.key, { flag: 'w' });
+
         const x509Cert = this.loadClientCert();
 
         resolve(x509Cert);

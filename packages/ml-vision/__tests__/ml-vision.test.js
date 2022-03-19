@@ -12,6 +12,7 @@ describe('@ekycsolutions/ml-vision', () => {
       auth: {
         caCertificatePath: '/tmp/ca.cert.pem',
         clientCertSavePath: '/tmp/client.cert.pem',
+        clientCertKeySavePath: '/tmp/client.key.pem',
         apiKeyPath: path.resolve('../../packages/auth/__tests__', 'test-key.json'),
       },
     });

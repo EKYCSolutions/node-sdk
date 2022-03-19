@@ -32,5 +32,8 @@
   },
   "bugs": {
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
+  },
+  "dependencies": {
+    "jose": "^4.6.0"
   }
 }
