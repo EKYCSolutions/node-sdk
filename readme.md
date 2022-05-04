@@ -21,11 +21,11 @@
 // for api references, please visit: https://docs.ews.ekycsolutions.com
 
 import Fastify from 'fastify';
-import { MLVision } from '@ekycsolutions/';
 import { EkycClient } from '@ekycsolutions/client';
+import { MLVision } from '@ekycsolutions/ml-vision';
 
 const ekycClient = new EkycClient({
-  serverAddress: 'https://ews.sandbox.ekycsolutions.com:4443',
+  serverAddress: 'https://server.ews.sandbox.ekycsolutions.com:4443',
   auth: {
     caCertificatePath: '/tmp/ca.cert.pem',
     clientCertSavePath: '/tmp/client.cert.pem',
@@ -50,12 +50,10 @@ fastify.post('/test-id-ocr', async (_req, reply) => {
   reply.send(result);
 });
 
-fastify.listen(4000, (err, addr) => {
+fastify.listen(4000, (err) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);
   }
-
-  fastify.log.info(`awesome app server is listening at: ${addr}`);
 });
 ```
