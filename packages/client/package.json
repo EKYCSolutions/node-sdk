@@ -9,17 +9,14 @@
   "typings": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
+    "./*": "./dist/*",
     "./package.json": "./package.json"
   },
-  "directories": {
-    "lib": "src",
-    "test": "__tests__"
-  },
   "files": [
-    "src"
+    "dist"
   ],
   "publishConfig": {
-    "registry": "https://gitlab.com/api/v4/projects/22807607/packages/npm/"
+    "directory": "dist"
   },
   "repository": {
     "type": "git",
@@ -28,6 +25,7 @@
   "scripts": {
     "tsc": "tsc",
     "clean": "rimraf dist",
+    "prepublish": "yarn clean && tsc",
     "test": "NODE_OPTIONS=--experimental-vm-modules yarn jest"
   },
   "bugs": {
