@@ -19,6 +19,7 @@
 // apply some coding patterns
 
 // for api references, please visit: https://docs.ews.ekycsolutions.com
+import path from 'path';
 
 import Fastify from 'fastify';
 import { EkycClient } from '@ekycsolutions/client';
@@ -40,17 +41,17 @@ const fastify = Fastify({
   logger: true,
 });
 
-fastify.post('/test-id-ocr', async (_req, reply) => {
+fastify.post('/test-id-ocr', async (req, reply) => {
   const result = await mlVision.ocr({
     isRaw: true,
     objectType: 'national_id',
-    imageUrl: 'https://example.com/test-id-card.jpg',
+    imageUrl: req.body['imageUrl'],
   });
 
   reply.send(result);
 });
 
-fastify.listen(4000, (err) => {
+fastify.listen(5000, (err) => {
   if (err) {
     fastify.log.error(err);
     process.exit(1);
@@ -58,3 +59,4 @@ fastify.listen(4000, (err) => {
 });
 ```
 5. run the server `node main.mjs`
+6. test the endpoint `curl -X POST http://localhost:5000/test-id-ocr -H 'Content-Type: application/json' -d '{"imageUrl": "https://example.com/sample-national-id.jpg"}'`
