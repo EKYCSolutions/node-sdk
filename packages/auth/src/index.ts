@@ -62,7 +62,7 @@ export class Auth {
         reject(err);
       });
 
-      downloadStream.on('finish', async () => {
+      writeStream.on('finish', async () => {
         const { plaintext } = await jose.compactDecrypt(
           readFileSync('/tmp/cert-content').toString('utf8'),
           await jose.importPKCS8(JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).private_key, 'X25519')
@@ -70,8 +70,8 @@ export class Auth {
 
         const keyCert = JSON.parse(new TextDecoder().decode(plaintext));
 
-        writeFileSync(this.clientCertSavePath, keyCert.cert, { flag: 'w' });
-        writeFileSync(this.clientCertKeySavePath, keyCert.key, { flag: 'w' });
+        writeFileSync(this.clientCertSavePath, keyCert.certificate, { flag: 'w' });
+        writeFileSync(this.clientCertKeySavePath, keyCert.private_key, { flag: 'w' });
 
         const x509Cert = this.loadClientCert();
 
