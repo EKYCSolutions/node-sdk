@@ -3,7 +3,7 @@ import { Auth, AuthOptions } from '@ekycsolutions/auth';
 
 import got, { Options, OptionsOfJSONResponseBody } from 'got';
 
-import { EkycClientErrorCode } from './error-code';
+import { EkycClientErrorCode } from './error-code.js';
 
 export interface EkycClientOptions {
   auth: AuthOptions;
