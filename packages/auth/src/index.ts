@@ -64,7 +64,7 @@ export class Auth {
 
       downloadStream.on('finish', async () => {
         const { plaintext } = await jose.compactDecrypt(
-          readFileSync('/tmp/cert-cotent').toString('utf8'),
+          readFileSync('/tmp/cert-content').toString('utf8'),
           await jose.importPKCS8(JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).private_key, 'X25519')
         );
 
@@ -110,6 +110,6 @@ export class Auth {
   }
 
   public isClientCertExpired(): boolean {
-    return this.isClientCertExists() && new Date(this.clientCert.validTo) < new Date();
+    return !this.isClientCertExists() || new Date(this.clientCert.validTo) < new Date();
   }
 }
