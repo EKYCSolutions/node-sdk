@@ -10,9 +10,9 @@
 1. install your choice of server library, eg: `npm i fastify`
 2. for `ml-vision` sdk, install the library `npm i @ekycsolutions/ml-vision`
 3. create an account at https://console.ews.ekycsolutions.com, create a project, create an api credential and name it `api-key.json`
-4. prepare an id card photo to be used for this testing and the following code will call an `ocr` request to do `id-ocr` so save the code at `main.ejs`
+4. prepare an id card photo to be used for this testing and the following code will call an `ocr` request to do `id-ocr` so save the code at `main.mjs`
 ```javascript
-// my-awesome-app/main.ejs
+// my-awesome-app/main.mjs
 
 // NOTE: the below code is for testing purpose,
 // please follow javascript best practices and
@@ -57,3 +57,4 @@ fastify.listen(4000, (err) => {
   }
 });
 ```
+5. run the server `node main.mjs`
