@@ -51,8 +51,6 @@ export class EkycClient {
     const mlRequestResult = await got(
       endpoint, requestOpts as OptionsOfJSONResponseBody).json<{ id: string; }>();
 
-
-
     if (mlRequestResult?.id) {
       return await this.apiResultPolling(mlRequestResult.id);
     }
