@@ -37,6 +37,7 @@ export class EkycClient {
     const authRequestOpts = await this.auth.getRequestOpts();
 
     return new Options({
+      isStream: false,
       responseType: 'json',
       prefixUrl: this.serverAddress,
       https: { ...authRequestOpts, minVersion: 'TLSv1.3', rejectUnauthorized: true },

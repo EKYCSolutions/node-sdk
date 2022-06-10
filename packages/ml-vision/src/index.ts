@@ -1,5 +1,7 @@
 
 
+import { randomUUID } from 'crypto';
+
 import { Options } from 'got';
 import FormData from 'form-data';
 
@@ -36,6 +38,7 @@ export class MLVision {
     formData.append('is_raw', isRaw);
     formData.append('image_url', imageUrl);
     formData.append('object_type', objectType);
+    formData.append('idempotent_id', randomUUID());
 
     const requestOpts = new Options({
       body: formData,
