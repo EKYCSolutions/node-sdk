@@ -19,7 +19,8 @@
     "ts-compile": "lerna run tsc",
     "prepublish": "lerna run prepublish",
     "publish": "yarn clean && lerna run tsc && lerna publish",
-    "publish.local": "yarn prepublish && lerna exec 'npm publish --registry http://localhost:4873'"
+    "publish.local": "yarn prepublish && lerna exec 'npm publish --registry http://localhost:4873'",
+    "unpublish.local": "rimraf ~/.config/verdaccio/storage/*"
   },
   "dependencies": {
     "got": "^12.0.1"
