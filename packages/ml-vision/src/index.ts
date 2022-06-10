@@ -15,12 +15,12 @@ export interface FaceCompareParams extends CommonMLVisionParams {
 }
 
 export enum OcrObjectType {
-  nationalId = 'national-id',
+  nationalId = 'NATIONAL_ID_0',
 }
 
 export interface OcrParams extends CommonMLVisionParams {
-  isRaw?: boolean;
   imageUrl: string;
+  isRaw?: 'yes' | 'no';
   objectType: OcrObjectType;
 }
 
@@ -39,9 +39,10 @@ export class MLVision {
 
     const requestOpts = new Options({
       body: formData,
+      method: 'POST',
       headers: formData.getHeaders(),
     });
 
-    return await this.ekycClient.makeRequest('/v0/ocr', requestOpts);
+    return await this.ekycClient.makeRequest('v0/ocr', requestOpts);
   }
 }
