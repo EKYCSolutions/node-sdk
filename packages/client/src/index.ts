@@ -65,7 +65,7 @@ export class EkycClient {
 
     mkdirSync('/tmp/request-ids', { recursive: true });
 
-    writeFileSync(`/tmp/reqeust-ids/${idempotentId}`, idempotentId, { mode: '0440' });
+    writeFileSync(`/tmp/request-ids/${idempotentId}`, idempotentId, { mode: '0440' });
 
     formData.append('idempotent_id', idempotentId);
 
