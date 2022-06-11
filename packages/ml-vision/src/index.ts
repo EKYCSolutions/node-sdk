@@ -1,9 +1,6 @@
 
 
-import { randomUUID } from 'crypto';
-
 import { Options } from 'got';
-import FormData from 'form-data';
 
 import { ApiResult, EkycClient } from '@ekycsolutions/client';
 
@@ -33,12 +30,11 @@ export class MLVision {
   }
 
   public async ocr({ isRaw, imageUrl, objectType }: Readonly<OcrParams>): Promise<ApiResult> {
-    const formData = new FormData();
+    const formData = this.ekycClient.prepareFormData();
 
     formData.append('is_raw', isRaw);
     formData.append('image_url', imageUrl);
     formData.append('object_type', objectType);
-    formData.append('idempotent_id', randomUUID());
 
     const requestOpts = new Options({
       body: formData,

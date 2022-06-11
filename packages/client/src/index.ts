@@ -1,6 +1,9 @@
 
-import { Auth, AuthOptions } from '@ekycsolutions/auth';
+import { randomUUID } from 'crypto';
+import { writeFileSync, mkdirSync } from 'fs';
 
+import FormData from 'form-data';
+import { Auth, AuthOptions } from '@ekycsolutions/auth';
 import got, { Options, OptionsOfJSONResponseBody } from 'got';
 
 import { EkycClientErrorCode } from './error-code.js';
@@ -53,6 +56,20 @@ export class EkycClient {
       prefixUrl: this.serverAddress,
       https: { ...authRequestOpts, minVersion: 'TLSv1.3', rejectUnauthorized: true },
     });
+  }
+
+  public prepareFormData(): FormData {
+    const formData = new FormData();
+
+    const idempotentId = randomUUID();
+
+    mkdirSync('/tmp/request-ids', { recursive: true });
+
+    writeFileSync(`/tmp/reqeust-ids/${idempotentId}`, idempotentId, { mode: '0440' });
+
+    formData.append('idempotent_id', idempotentId);
+
+    return formData;
   }
 
   public async makeRequest(endpoint: string, options: Options): Promise<ApiResult> {
