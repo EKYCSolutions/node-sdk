@@ -127,7 +127,7 @@ export class EkycClient {
             endTime: res.service_usage.end_time,
             startTime: res.service_usage.start_time,
             timeElapsedAsSec: (
-              new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) * 1000,
+              new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) / 1000,
           };
         }
 
@@ -140,7 +140,7 @@ export class EkycClient {
             endTime: res.service_usage.end_time,
             startTime: res.service_usage.start_time,
             timeElapsedAsSec: (
-              new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) * 1000,
+              new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) / 1000,
           };
         }
 
