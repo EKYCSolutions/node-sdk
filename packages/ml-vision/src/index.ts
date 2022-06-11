@@ -30,7 +30,10 @@ export class MLVision {
   }
 
   public async ocr({ isRaw, imageUrl, objectType }: Readonly<OcrParams>): Promise<ApiResult> {
-    const formData = this.ekycClient.prepareFormData();
+    const formData = this.ekycClient.prepareFormData({
+      api: 'ocr',
+      version: 'v0',
+    });
 
     formData.append('is_raw', isRaw);
     formData.append('image_url', imageUrl);

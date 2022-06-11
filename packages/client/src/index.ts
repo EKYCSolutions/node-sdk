@@ -14,6 +14,11 @@ export interface EkycClientOptions {
   maxRequestTimeoutAsSec?: number;
 }
 
+export interface PrepareFormDataMeta {
+  api: string;
+  version: string;
+}
+
 export interface ApiResultResponse {
   result: any;
   error: {
@@ -58,14 +63,18 @@ export class EkycClient {
     });
   }
 
-  public prepareFormData(): FormData {
+  public prepareFormData(meta: PrepareFormDataMeta): FormData {
     const formData = new FormData();
 
     const idempotentId = randomUUID();
 
     mkdirSync('/tmp/request-ids', { recursive: true });
 
-    writeFileSync(`/tmp/request-ids/${idempotentId}`, idempotentId, { mode: '0440' });
+    writeFileSync(
+      `/tmp/request-ids/${idempotentId}`,
+      JSON.stringify({ ...meta, idempotentId, preparedAt: new Date() }, undefined, 2),
+      { mode: '0440' }
+    );
 
     formData.append('idempotent_id', idempotentId);
 
