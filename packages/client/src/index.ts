@@ -3,8 +3,8 @@ import { randomUUID } from 'crypto';
 import { writeFileSync, mkdirSync } from 'fs';
 
 import FormData from 'form-data';
+import got, { Options, OptionsInit } from 'got';
 import { Auth, AuthOptions } from '@ekycsolutions/auth';
-import got, { Options, OptionsOfJSONResponseBody } from 'got';
 
 import { EkycClientErrorCode } from './error-code.js';
 
@@ -39,6 +39,9 @@ export interface ApiResult {
   message: string;
   errorCode: string;
   isSuccess: boolean;
+  endTime: string;
+  startTime: string;
+  timeElapsedAsSec: number;
 }
 
 export class EkycClient {
@@ -52,15 +55,16 @@ export class EkycClient {
     this.serverAddress = serverAddress ?? 'https://server.ews.sandbox.ekycsolutions.com';
   }
 
-  public async getRequestOpts(): Promise<Options> {
+  public async getRequestOpts(): Promise<OptionsInit> {
     const authRequestOpts = await this.auth.getRequestOpts();
 
-    return new Options({
+    return {
+      http2: true,
       isStream: false,
       responseType: 'json',
       prefixUrl: this.serverAddress,
       https: { ...authRequestOpts, minVersion: 'TLSv1.3', rejectUnauthorized: true },
-    });
+    };
   }
 
   public prepareFormData(meta: PrepareFormDataMeta): FormData {
@@ -82,12 +86,11 @@ export class EkycClient {
   }
 
   public async makeRequest(endpoint: string, options: Options): Promise<ApiResult> {
-    const requestOpts = await this.getRequestOpts();
+    const connectionOpts = await this.getRequestOpts();
 
-    requestOpts.merge(options);
+    options.merge(connectionOpts);
 
-    const mlRequestResult = await got(
-      endpoint, requestOpts as OptionsOfJSONResponseBody).json<{ id: string; }>();
+    const mlRequestResult = await got(endpoint, { ...options }).json<{ id: string; }>();
 
     if (mlRequestResult?.id) {
       return await this.apiResultPolling(mlRequestResult.id);
@@ -112,7 +115,7 @@ export class EkycClient {
         const res =
           await got(
             `v0/api-request-reply/${responseId}`,
-            { ...await this.getRequestOpts(), responseType: 'json' },
+            { ...new Options(await this.getRequestOpts()), responseType: 'json' },
           ).json<ApiResultResponse>();
 
         if (res?.result) {
@@ -121,6 +124,10 @@ export class EkycClient {
             errorCode: '',
             isSuccess: true,
             data: { responseId, ...res.result },
+            endTime: res.service_usage.end_time,
+            startTime: res.service_usage.start_time,
+            timeElapsedAsSec: (
+              new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) * 1000,
           };
         }
 
@@ -130,6 +137,10 @@ export class EkycClient {
             data: { responseId },
             errorCode: res.error.code,
             message: res.error.message,
+            endTime: res.service_usage.end_time,
+            startTime: res.service_usage.start_time,
+            timeElapsedAsSec: (
+              new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) * 1000,
           };
         }
 
@@ -141,6 +152,9 @@ export class EkycClient {
             data: { responseId },
             errorCode: EkycClientErrorCode.resultTimeout,
             message: `fail to wait for result due to "maxRequestTimeoutAsSec(${this.maxRequestTimeoutAsSec})" reached`,
+            endTime: null,
+            startTime: null,
+            timeElapsedAsSec: null,
           };
         }
 
@@ -153,6 +167,9 @@ export class EkycClient {
           data: { responseId },
           message: err.toString(),
           errorCode: EkycClientErrorCode.unexpectedError,
+          endTime: null,
+          startTime: null,
+          timeElapsedAsSec: null,
         };
       } 
     } 
