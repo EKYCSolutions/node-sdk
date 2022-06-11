@@ -21,7 +21,7 @@ import { EkycClient } from '@ekycsolutions/client';
 import { MLVision } from '@ekycsolutions/ml-vision';
 
 const ekycClient = new EkycClient({
-  serverAddress: 'https://server.ews.sandbox.ekycsolutions.com:4443',
+  serverAddress: 'https://server.ews.sandbox.ekycsolutions.com',
   auth: {
     caCertificatePath: '/tmp/ca.cert.pem',
     clientCertSavePath: '/tmp/client.cert.pem',
