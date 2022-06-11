@@ -12,7 +12,18 @@ export interface EkycClientOptions {
 }
 
 export interface ApiResultResponse {
-  ml_result: any;
+  result: any;
+  error: {
+    code: string;
+    message: string;
+  };
+  service_usage: {
+    id: string;
+    end_time: string;
+    start_time: string;
+    inserted_at: string;
+    is_success: boolean;
+  };
 }
 
 export interface ApiResult {
@@ -78,12 +89,21 @@ export class EkycClient {
             { ...await this.getRequestOpts(), responseType: 'json' },
           ).json<ApiResultResponse>();
 
-        if (res?.ml_result) {
+        if (res?.result) {
           return {
             message: '',
             errorCode: '',
             isSuccess: true,
-            data: { responseId, ...res.ml_result },
+            data: { responseId, ...res.result },
+          };
+        }
+
+        if (res?.error?.code) {
+          return {
+            isSuccess: false,
+            data: { responseId },
+            errorCode: res.error.code,
+            message: res.error.message,
           };
         }
 
