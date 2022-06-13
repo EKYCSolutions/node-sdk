@@ -35,16 +35,16 @@
     # ...more blocks
     ```
 
-    c. run `yarn publish.local` to publish `@ekycsolutions/*` packages to local npm registry
-
-    d. run `yarn unpublish.local` to unpublish `@ekycsolutions/*` packages from local npm registry (for clean up or publish same package version during/after development)
-
-    e. back to project repo, add `.npmrc` with the following content
+    c. back to project repo, add `.npmrc` with the following content
     ```
     registry=http://localhost:4873/
     //localhost:4873/:_authToken=fake
     ```
     NOTE: during sdk development, rename or remove `.npmrc` file away from using localhost as proxy to install npm packages to avoid telling `yarn.lock` to npm package from local registry
+
+    d. run `yarn publish.local` to publish `@ekycsolutions/*` packages to local npm registry
+
+    e. run `yarn unpublish.local` to unpublish `@ekycsolutions/*` packages from local npm registry (for clean up or publish same package version during/after development) 
 4. create a new nodejs project, `mkdir my-awesome-app && cd my-awesome-app && npm init -y`
 5. install your choice of server library, eg: `npm i fastify`
 6. for `ml-vision` sdk, install the library `npm i @ekycsolutions/ml-vision --registry http://localhost:4873`
