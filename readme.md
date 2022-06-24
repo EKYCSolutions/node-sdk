@@ -47,7 +47,7 @@
     e. run `yarn unpublish.local` to unpublish `@ekycsolutions/*` packages from local npm registry (for clean up or publish same package version during/after development) 
 4. create a new nodejs project, `mkdir my-awesome-app && cd my-awesome-app && npm init -y`
 5. install your choice of server library, eg: `npm i fastify`
-6. for `ml-vision` sdk, install the library `npm i @ekycsolutions/ml-vision --registry http://localhost:4873`
+6. for `ml-vision` sdk, install the library `npm i @ekycsolutions/client @ekycsolutions/ml-vision --registry http://localhost:4873`
 7. create an account, create a project, create an api credential and name it `api-key.json`
 8. prepare an id card photo to be used for this testing and the following code will call an `ocr` request to do `id-ocr` so save the code at `main.mjs`
 ```javascript
