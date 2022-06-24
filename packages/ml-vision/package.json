@@ -31,7 +31,12 @@
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
   },
   "dependencies": {
-    "@ekycsolutions/client": "^0.0.6",
     "form-data": "^4.0.0"
+  },
+  "peerDependencies": {
+    "@ekycsolutions/client": "^0.0.6"
+  },
+  "devDependencies": {
+    "@ekycsolutions/client": "^0.0.6"
   }
 }
