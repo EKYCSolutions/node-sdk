@@ -1,9 +1,10 @@
 
-import { writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 
 import fp from 'fastify-plugin';
 import { nanoid } from 'nanoid';
 import { FastifyInstance } from 'fastify';
+import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
 
 import { MLVision, OcrObjectType } from '@ekycsolutions/ml-vision';
@@ -29,9 +30,11 @@ export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOp
   name: '@ekycsolutions/fastify-ekyc',
 });
 
-export const ekycRoutes = fp(async (fastify: FastifyInstance, _opts, next) => { 
+export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => { 
+  mkdirSync('/tmp/ekyc-uploads', { recursive: true });
+
   fastify.route({
-    url: '/ocr',
+    url: '/v0/ocr',
     method: ['POST'],
     schema: {
       response: {
@@ -87,12 +90,17 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, _opts, next) => {
 
       const imageId = nanoid(32);
 
-      writeFileSync(`/tmp/${imageId}`, await body.image.toBuffer());
+      if (opts.fileStorageDriver === 's3') {
+      } else {
+        writeFileSync(`/tmp/ekyc-uploads/${imageId}`, await body.image.toBuffer());
+      }
 
       const result = await mlVision.ocr({
         objectType: body.objectType.value,
         isRaw: body?.isRaw?.value ?? 'yes',
-        imageUrl: request.body['imageUrl'],
+        imageUrl: opts.fileStorageDriver === 's3'
+          ? `${opts.s3Url}/ekyc-uploads/${imageId}`
+          : `${opts.serverUrl}/uploads/public/${imageId}`,
       });
 
       reply.send(result);
@@ -106,13 +114,33 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, _opts, next) => {
   dependencies: ['@fastify/multipart', '@ekycsolutions/fastify-ekyc'],
 });
 
-export const ekycRoutesPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions) => {
+export const ekycRoutesPlugin = fp(async (
+  fastify: FastifyInstance,
+  opts: {
+    ekycPluginArgs: EkycClientOptions;
+    ekycRoutesPluginArgs: {
+      serverUrl: string;
+      isServeUploadFiles?: boolean;
+      fileStorageDriver: 's3' | 'local';
+    };
+  }
+) => {
   fastify.register(fastifyMultipart, {
     attachFieldsToBody: true,
     sharedSchemaId: '#multipartSchema',
   });
 
-  fastify.register(ekycPlugin, opts);
+  if (
+    opts.ekycRoutesPluginArgs.fileStorageDriver !== 's3' &&
+    (opts.ekycRoutesPluginArgs?.isServeUploadFiles ?? true)
+  ) {
+    fastify.register(fastifyStatic, {
+      root: '/tmp/ekyc-uploads',
+      prefix: '/uploads/public/',
+    });
+  } 
 
-  fastify.register(ekycRoutes);
+  fastify.register(ekycPlugin, opts.ekycPluginArgs);
+
+  fastify.register(ekycRoutes, opts.ekycRoutesPluginArgs);
 });
