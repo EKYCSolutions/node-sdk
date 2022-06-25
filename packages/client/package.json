@@ -1,6 +1,6 @@
 {
   "name": "@ekycsolutions/client",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "entrypoint, api client to interact with ekycsolutions api",
   "author": "ShadowLegend <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
@@ -32,6 +32,6 @@
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
   },
   "dependencies": {
-    "@ekycsolutions/auth": "^0.0.7"
+    "@ekycsolutions/auth": "^0.0.8"
   }
 }
