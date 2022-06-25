@@ -1,7 +1,7 @@
 {
   "name": "ekycsolutions",
   "type": "module",
-  "private": true,
+  "private": false,
   "workspaces": [
     "packages/*"
   ],
@@ -24,5 +24,6 @@
   },
   "dependencies": {
     "got": "^12.0.1"
-  }
+  },
+  "version": "0.0.7"
 }
