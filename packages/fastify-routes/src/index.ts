@@ -30,6 +30,23 @@ export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOp
   name: '@ekycsolutions/fastify-ekyc',
 });
 
+const mlApiRequestResponseSchema = {
+  type: 'object',
+  properties: {
+    endTime: { type: 'string' },
+    message: { type: 'string' },
+    startTime: { type: 'string' },
+    errorCode: { type: 'string' },
+    isSuccess: { type: 'boolean' },
+    timeElapsedAsSec: { type: 'number' },
+    data: {
+      type: 'object',
+      additionalProperties: true,
+      properties: { responseId: { type: 'string' } },
+    },
+  },
+};
+
 export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => { 
   mkdirSync('/tmp/ekyc-uploads', { recursive: true });
 
@@ -38,22 +55,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => {
     method: ['POST'],
     schema: {
       response: {
-        200: {
-          type: 'object',
-          properties: {
-            endTime: { type: 'string' },
-            message: { type: 'string' },
-            startTime: { type: 'string' },
-            errorCode: { type: 'string' },
-            isSuccess: { type: 'boolean' },
-            timeElapsedAsSec: { type: 'number' },
-            data: {
-              type: 'object',
-              additionalProperties: true,
-              properties: { responseId: { type: 'string' } },
-            },
-          },
-        },
+        200: mlApiRequestResponseSchema,
       },
       body: {
         type: 'object',
@@ -101,6 +103,52 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => {
         imageUrl: opts.fileStorageDriver === 's3'
           ? `${opts.s3Url}/ekyc-uploads/${imageId}`
           : `${opts.serverUrl}/uploads/public/${imageId}`,
+      });
+
+      reply.send(result);
+    },
+  });
+
+  fastify.route({
+    url: '/v0/face-compare',
+    method: ['POST'],
+    schema: {
+      response: {
+        200: mlApiRequestResponseSchema,
+      },
+      body: {
+        type: 'object',
+        required: ['faceImage0', 'faceImage1'],
+        properties: {
+          faceImage0: {
+            $ref: '#multipartSchema',
+          },
+          faceImage1: {
+            $ref: '#multipartSchema',
+          },
+        },
+      },
+    },
+    handler: async (request, reply) => {
+      const mlVision: MLVision = (request as any).ekycMlVision;
+
+      const body = request.body as any;
+
+      const imageId = nanoid(32);
+
+      if (opts.fileStorageDriver === 's3') {
+      } else {
+        writeFileSync(`/tmp/ekyc-uploads/${imageId}.0`, await body.faceImage0.toBuffer());
+        writeFileSync(`/tmp/ekyc-uploads/${imageId}.1`, await body.faceImage1.toBuffer());
+      }
+
+      const result = await mlVision.faceCompare({
+        faceImage0Url: opts.fileStorageDriver === 's3'
+          ? `${opts.s3Url}/ekyc-uploads/${imageId}.0`
+          : `${opts.serverUrl}/uploads/public/${imageId}.0`,
+        faceImage1Url: opts.fileStorageDriver === 's3'
+          ? `${opts.s3Url}/ekyc-uploads/${imageId}.1`
+          : `${opts.serverUrl}/uploads/public/${imageId}.1`,
       });
 
       reply.send(result);

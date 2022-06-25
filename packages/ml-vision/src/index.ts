@@ -9,8 +9,8 @@ export interface CommonMLVisionParams {
 }
 
 export interface FaceCompareParams extends CommonMLVisionParams {
-  face0Url: string;
-  face1Url: string;
+  faceImage0Url: string;
+  faceImage1Url: string;
 }
 
 export enum OcrObjectType {
@@ -26,7 +26,22 @@ export interface OcrParams extends CommonMLVisionParams {
 export class MLVision {
   constructor(private readonly ekycClient: EkycClient) {}
 
-  public async faceCompare({}: Readonly<FaceCompareParams>) {
+  public async faceCompare({ faceImage0Url, faceImage1Url }: Readonly<FaceCompareParams>) {
+    const formData = this.ekycClient.prepareFormData({
+      api: 'ocr',
+      version: 'v0',
+    });
+
+    formData.append('face_image_0_url', faceImage0Url);
+    formData.append('face_image_1_url', faceImage1Url);
+
+    const requestOpts = new Options({
+      body: formData,
+      method: 'POST',
+      headers: formData.getHeaders(),
+    });
+
+    return await this.ekycClient.makeRequest('v0/face-compare', requestOpts);
   }
 
   public async ocr({ isRaw, imageUrl, objectType }: Readonly<OcrParams>): Promise<ApiResult> {
