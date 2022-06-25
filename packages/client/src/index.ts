@@ -123,9 +123,9 @@ export class EkycClient {
             message: '',
             errorCode: '',
             isSuccess: true,
-            data: { responseId, ...res.result },
             endTime: res.service_usage.end_time,
             startTime: res.service_usage.start_time,
+            data: { responseId, result: res.result },
             timeElapsedAsSec: (
               new Date(res.service_usage.end_time).getTime() - new Date(res.service_usage.start_time).getTime()) / 1000,
           };
@@ -134,9 +134,9 @@ export class EkycClient {
         if (res?.error?.code) {
           return {
             isSuccess: false,
-            data: { responseId },
             errorCode: res.error.code,
             message: res.error.message,
+            data: { responseId, result: null },
             endTime: res.service_usage.end_time,
             startTime: res.service_usage.start_time,
             timeElapsedAsSec: (
@@ -149,7 +149,7 @@ export class EkycClient {
         if (exp > this.maxRequestTimeoutAsSec) {
           return {
             isSuccess: false,
-            data: { responseId },
+            data: { responseId, result: null },
             errorCode: EkycClientErrorCode.resultTimeout,
             message: `fail to wait for result due to "maxRequestTimeoutAsSec(${this.maxRequestTimeoutAsSec})" reached`,
             endTime: null,
@@ -164,7 +164,7 @@ export class EkycClient {
       } catch (err) {
         return {
           isSuccess: false,
-          data: { responseId },
+          data: { responseId, reuslt: null },
           message: err.toString(),
           errorCode: EkycClientErrorCode.unexpectedError,
           endTime: null,
