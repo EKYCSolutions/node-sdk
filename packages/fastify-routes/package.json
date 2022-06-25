@@ -33,6 +33,7 @@
   },
   "peerDependencies": {
     "@fastify/multipart": "^7.1.0",
+    "@fastify/static": "^6.4.0",
     "fastify": "^4.1.0",
     "fastify-plugin": "^3.0.1"
   },
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@fastify/multipart": "^7.1.0",
+    "@fastify/static": "^6.4.0",
     "fastify": "^4.1.0",
     "fastify-plugin": "^3.0.1"
   }
