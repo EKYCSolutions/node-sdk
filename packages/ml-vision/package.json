@@ -34,7 +34,7 @@
     "form-data": "^4.0.0"
   },
   "peerDependencies": {
-    "@ekycsolutions/client": "^0.0.6"
+    "@ekycsolutions/client": "^0.0.9"
   },
   "devDependencies": {
     "@ekycsolutions/client": "^0.0.9"
