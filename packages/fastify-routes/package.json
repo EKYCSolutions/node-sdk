@@ -1,6 +1,6 @@
 {
   "name": "@ekycsolutions/fastify-routes",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "predefined routes to integrate with ui sdk",
   "author": "xshadowlegendx <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
@@ -38,8 +38,8 @@
     "fastify-plugin": "^3.0.1"
   },
   "dependencies": {
-    "@ekycsolutions/client": "^0.0.8",
-    "@ekycsolutions/ml-vision": "^0.0.8",
+    "@ekycsolutions/client": "^0.0.9",
+    "@ekycsolutions/ml-vision": "^0.0.9",
     "nanoid": "^4.0.0"
   },
   "devDependencies": {

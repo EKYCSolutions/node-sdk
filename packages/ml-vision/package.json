@@ -1,6 +1,6 @@
 {
   "name": "@ekycsolutions/ml-vision",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "ekycsolutions computer vision api",
   "author": "ShadowLegend <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
@@ -37,6 +37,6 @@
     "@ekycsolutions/client": "^0.0.6"
   },
   "devDependencies": {
-    "@ekycsolutions/client": "^0.0.8"
+    "@ekycsolutions/client": "^0.0.9"
   }
 }
