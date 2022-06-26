@@ -1,7 +1,7 @@
 {
   "name": "ekycsolutions",
   "type": "module",
-  "private": false,
+  "private": true,
   "workspaces": [
     "packages/*"
   ],
@@ -19,6 +19,7 @@
     "ts-compile": "lerna run tsc",
     "prepublish": "lerna run prepublish",
     "publish": "yarn clean && lerna run tsc && lerna publish",
+    "unpublish": "npm unpublish",
     "publish.local": "yarn prepublish && lerna exec 'npm publish --registry http://localhost:4873'",
     "unpublish.local": "lerna exec 'npm unpublish --force --registry http://localhost:4873'"
   },
