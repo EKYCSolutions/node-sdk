@@ -144,7 +144,7 @@ export class EkycClient {
           };
         }
 
-        const exp = Math.pow(2, retryCount);
+        const exp = Math.pow(1.32, retryCount);
 
         if (exp > this.maxRequestTimeoutAsSec) {
           return {
