@@ -26,7 +26,7 @@ const fastify = Fastify({
 
 fastify.register(ekycRoutesPlugin, {
   ekycPluginArgs: {
-    serverAddress: 'https://server.ews.sandbox.ekycsolutions.com',
+    serverAddress: 'https://server.ews.ekycsolutions.com',
     auth: {
       clientCertSavePath: '/tmp/client.cert.pem',
       clientCertKeySavePath: '/tmp/client.key.pem',
