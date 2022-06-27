@@ -24,7 +24,7 @@ To see all of these features at work download our free demo app at PlayStore. Fo
 
 ## Getting Started
 0. create a new nodejs project, `mkdir my-awesome-app && cd my-awesome-app && npm init -y`
-1. install some deps, `npm i @ekycsolutions/client @ekycsolutions/fastify-routes @ekycsolutions/ml-vision @fastify/multipart @fastify/static fastify fastify-plugin`
+1. install some deps, `npm i got @ekycsolutions/client @ekycsolutions/fastify-routes @ekycsolutions/ml-vision @fastify/multipart @fastify/static fastify fastify-plugin`
 
     NOTE: if you test the sdk in local environment, also install `ngrok` by doing `npm i ngrok --dev` and run `ngrok http 5000`, and save the address for later used below
 3. create an account at https://console.ews.ekycsolutions.com, create a project, create an api credential and name it `api-key.json`
