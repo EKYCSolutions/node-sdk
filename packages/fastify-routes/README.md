@@ -54,6 +54,15 @@ fastify.register(ekycRoutesPlugin, {
     // s3Url: 'bucket.us-east-1.amazonaws.com',
     // s3AccessKeyId: 'abc',
     // s3SecretAccessKey: 'def',
+
+    // hook to get api result before sending
+    // response to client
+    onMlApiResult: (onMlApiResult, metadata) => {
+      console.log('==== ml api result ====');
+      console.log(JSON.stringify(onMlApiResult, null, 2));
+      console.log('==== ml api metadata ====');
+      console.log(metadata);
+    },
   },
 });
 
