@@ -47,13 +47,8 @@ fastify.register(ekycRoutesPlugin, {
     // true by default
     // isServeUploadFiles: true,
 
-    // valid value are 'local' | 's3'
+    // valid value are 'local'
     // fileStorageDriver: 'local',
-
-    // for s3 config
-    // s3Url: 'bucket.us-east-1.amazonaws.com',
-    // s3AccessKeyId: 'abc',
-    // s3SecretAccessKey: 'def',
 
     // hook to get api result before sending
     // response to client
