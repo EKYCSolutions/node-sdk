@@ -1,4 +1,6 @@
+![image](https://user-images.githubusercontent.com/81238558/175767662-be4dc9ba-a6bd-459d-aaa3-f8ad0c96aa37.png)
 
+# EkycID Node SDK
 ### NodeJS SDK for EKYCSolutions API
 ---
 
@@ -65,6 +67,8 @@ fastify.listen(5000, (err) => {
 ```
 4. run the server `node main.mjs`
 5. test the endpoint `curl -X POST http://localhost:5000/test-id-ocr -H 'Content-Type: application/json' -d '{"imageUrl": "https://example.com/sample-national-id.jpg"}'`
+
+---
 
 ### Fastify Routes Plugin
 #### We also provide fastify plugin that has predefined routes for all our ml api
