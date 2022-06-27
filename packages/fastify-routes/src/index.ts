@@ -8,7 +8,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
 
 import { MLVision, OcrObjectType } from '@ekycsolutions/ml-vision';
-import { EkycClient, EkycClientOptions } from '@ekycsolutions/client';
+import { ApiResult, EkycClient, EkycClientOptions } from '@ekycsolutions/client';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
   const ekycClient = new EkycClient(opts);
@@ -47,7 +47,28 @@ const mlApiRequestResponseSchema = {
   },
 };
 
-export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => { 
+export interface OnMlApiResultMetadata {
+  apiName: string;
+  apiVersion: string;
+}
+
+export interface EkycRoutesOpts {
+  serverUrl: string;
+  isServeUploadFiles?: boolean;
+  fileStorageDriver: 's3' | 'local';
+  onMlApiResult?: (mlApiResult: ApiResult, metadata: OnMlApiResultMetadata) => any;
+  s3?: {
+    host: string;
+    port: number;
+    scheme: string;
+    bucket: string;
+    region: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
+}
+
+export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOpts, next) => { 
   mkdirSync('/tmp/ekyc-uploads', { recursive: true });
 
   fastify.route({
@@ -101,9 +122,15 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => {
         objectType: body.objectType.value,
         isRaw: body?.isRaw?.value ?? 'yes',
         imageUrl: opts.fileStorageDriver === 's3'
-          ? `${opts.s3Url}/ekyc-uploads/${imageId}`
+          ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}`
           : `${opts.serverUrl}/uploads/public/${imageId}`,
       });
+
+      try {
+        opts.onMlApiResult(result, { apiName: 'ocr', apiVersion: 'v0' });
+      } catch (err) {
+        console.trace(err);
+      }
 
       reply.send(result);
     },
@@ -144,12 +171,20 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts, next) => {
 
       const result = await mlVision.faceCompare({
         faceImage0Url: opts.fileStorageDriver === 's3'
-          ? `${opts.s3Url}/ekyc-uploads/${imageId}.0`
+          ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}.0`
           : `${opts.serverUrl}/uploads/public/${imageId}.0`,
         faceImage1Url: opts.fileStorageDriver === 's3'
-          ? `${opts.s3Url}/ekyc-uploads/${imageId}.1`
+          ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}.1`
           : `${opts.serverUrl}/uploads/public/${imageId}.1`,
       });
+
+      if (opts.onMlApiResult?.apply) {
+        try {
+          opts.onMlApiResult(result, { apiName: 'face-compare', apiVersion: 'v0' });
+        } catch (err) {
+          console.trace(err);
+        }
+      }
 
       reply.send(result);
     },
@@ -166,11 +201,7 @@ export const ekycRoutesPlugin = fp(async (
   fastify: FastifyInstance,
   opts: {
     ekycPluginArgs: EkycClientOptions;
-    ekycRoutesPluginArgs: {
-      serverUrl: string;
-      isServeUploadFiles?: boolean;
-      fileStorageDriver: 's3' | 'local';
-    };
+    ekycRoutesPluginArgs: EkycRoutesOpts;
   }
 ) => {
   fastify.register(fastifyMultipart, {
