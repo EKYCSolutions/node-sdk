@@ -50,7 +50,7 @@ export class EkycClient {
   readonly maxRequestTimeoutAsSec: number;
 
   constructor({ auth, serverAddress, maxRequestTimeoutAsSec }: Readonly<EkycClientOptions>) {
-    this.auth = new Auth(auth);
+    this.auth = new Auth({ ...auth, serverAddress });
     this.maxRequestTimeoutAsSec = maxRequestTimeoutAsSec ?? 64;
     this.serverAddress = serverAddress ?? 'https://server.ews.ekycsolutions.com';
   }

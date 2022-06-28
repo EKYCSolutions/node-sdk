@@ -13,24 +13,34 @@ export interface AuthOptions {
   clientCertKeySavePath?: string;
 }
 
+export interface AuthOpts extends AuthOptions {
+  serverAddress: string;
+}
+
 export class Auth {
-  private readonly apiKeyPath: string;
+  readonly apiKeyPath: string;
+  readonly serverAddress: string;
   readonly caCertificatePath: string;
   readonly clientCertSavePath: string;
   readonly clientCertKeySavePath: string;
-  readonly clientCertDownloadUrl: string;
 
   clientCert: X509Certificate;
 
-  constructor({ apiKeyPath, caCertificatePath, clientCertSavePath, clientCertKeySavePath }: Readonly<AuthOptions>) {
+  constructor({ serverAddress, apiKeyPath, caCertificatePath, clientCertSavePath, clientCertKeySavePath }: Readonly<AuthOpts>) {
     this.apiKeyPath = apiKeyPath;
+    this.serverAddress = serverAddress;
     this.caCertificatePath = caCertificatePath;
 
     this.clientCertSavePath = clientCertSavePath ?? '/tmp/client.cert.pem';
     this.clientCertKeySavePath = clientCertKeySavePath ?? '/tmp/client.key.pem';
+  }
 
-    this.clientCertDownloadUrl =
-      JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).client_cert_url;
+  async getCertDownloadUrl(): Promise<string> {
+    return (await got.post(`${this.serverAddress}/api-keys/${JSON.parse(readFileSync(this.apiKeyPath).toString('utf8')).key_id}/cert-download-url`, {
+      https: {
+        certificateAuthority: this.caCertificatePath ? readFileSync(this.caCertificatePath) : undefined,
+      },
+    })).body;
   }
 
   public async getRequestOpts(): Promise<HttpsOptions> {
@@ -49,10 +59,10 @@ export class Auth {
   }
 
   public downloadClientCert(): Promise<X509Certificate> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const writeStream = createWriteStream('/tmp/cert-content', { flags: 'w' });
 
-      const downloadStream = got.stream(this.clientCertDownloadUrl);
+      const downloadStream = got.stream(await this.getCertDownloadUrl());
 
       writeStream.on('error', err => {
         reject(err);
