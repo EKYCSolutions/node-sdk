@@ -34,7 +34,6 @@ import { EkycClient } from '@ekycsolutions/client';
 import { MLVision } from '@ekycsolutions/ml-vision';
 
 const ekycClient = new EkycClient({
-  serverAddress: 'https://server.ews.ekycsolutions.com',
   auth: {
     clientCertSavePath: '/tmp/client.cert.pem',
     clientCertKeySavePath: '/tmp/client.key.pem',
@@ -96,7 +95,6 @@ const fastify = Fastify({
 
 fastify.register(ekycRoutesPlugin, {
   ekycPluginArgs: {
-    serverAddress: 'https://server.ews.ekycsolutions.com',
     auth: {
       clientCertSavePath: '/tmp/client.cert.pem',
       clientCertKeySavePath: '/tmp/client.key.pem',
