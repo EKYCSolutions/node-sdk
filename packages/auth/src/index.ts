@@ -83,7 +83,7 @@ export class Auth {
         writeFileSync(this.clientCertSavePath, keyCert.certificate, { flag: 'w' });
         writeFileSync(this.clientCertKeySavePath, keyCert.private_key, { flag: 'w' });
 
-        const x509Cert = this.loadClientCert();
+        const x509Cert = this.loadClientCert({ isLoadNew: true });
 
         resolve(x509Cert);
       });
@@ -92,8 +92,8 @@ export class Auth {
     }); 
   }
 
-  public loadClientCert(): X509Certificate {
-    if (this.clientCert?.serialNumber) {
+  public loadClientCert({ isLoadNew }: { isLoadNew?: boolean; } = {}): X509Certificate {
+    if (!isLoadNew && this.clientCert?.serialNumber) {
       return this.clientCert;
     }
 
