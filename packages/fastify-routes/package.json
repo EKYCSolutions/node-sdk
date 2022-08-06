@@ -47,5 +47,6 @@
     "@fastify/static": "^6.4.0",
     "fastify": "^4.1.0",
     "fastify-plugin": "^3.0.1"
-  }
+  },
+  "gitHead": "0d164ee60782ebfbe62be706853cc7eb43a43575"
 }

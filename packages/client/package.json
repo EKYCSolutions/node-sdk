@@ -33,5 +33,6 @@
   },
   "dependencies": {
     "@ekycsolutions/auth": "^0.0.14"
-  }
+  },
+  "gitHead": "0d164ee60782ebfbe62be706853cc7eb43a43575"
 }
