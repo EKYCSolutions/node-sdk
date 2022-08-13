@@ -3,9 +3,9 @@ import { mkdirSync, writeFileSync } from 'fs';
 
 import fp from 'fastify-plugin';
 import { nanoid } from 'nanoid';
-import { FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 import { MLVision, OcrObjectType } from '@ekycsolutions/ml-vision';
 import { ApiResult, EkycClient, EkycClientOptions } from '@ekycsolutions/client';
@@ -47,16 +47,30 @@ const mlApiRequestResponseSchema = {
   },
 };
 
-export interface OnMlApiResultMetadata {
+export interface OnMlApiMetadata {
   apiName: string;
   apiVersion: string;
+}
+
+export interface FastifyLifecycleHookMlContext {
+  apiResult: ApiResult;
+  metadata: OnMlApiMetadata;
+}
+
+export interface FastifyLifecycleHookContext {
+  done: any;
+  req: FastifyRequest;
+  reply: FastifyReply;
 }
 
 export interface EkycRoutesOpts {
   serverUrl: string;
   isServeUploadFiles?: boolean;
   fileStorageDriver: 's3' | 'local';
-  onMlApiResult?: (mlApiResult: ApiResult, metadata: OnMlApiResultMetadata) => any;
+  onMlApiResult?: (mlApiResult: ApiResult, metadata: OnMlApiMetadata) => any;
+  preMlRequest?: (fastifyContext: FastifyLifecycleHookContext, mlContext: FastifyLifecycleHookMlContext) => Promise<void>;
+  postMlRequestBeforeSend?: (fastifyContext: FastifyLifecycleHookContext, mlContext: FastifyLifecycleHookMlContext) =>
+    Promise<{ error: any; newPayload: any; }>;
   s3?: {
     host: string;
     port: number;
@@ -71,9 +85,50 @@ export interface EkycRoutesOpts {
 export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOpts, next) => { 
   mkdirSync('/tmp/ekyc-uploads', { recursive: true });
 
+  const apiMetadata = {
+    'ocr': [{
+      version: 0,
+      versionName: 'v0',
+    }],
+    'face-compare': [{
+      version: 0,
+      versionName: 'v0',
+    }],
+  };
+
+  const preHandler = async (req, reply, done) => {
+    if (opts?.preMlRequest?.apply) {
+      await opts.preMlRequest({ req, reply, done }, {
+        apiResult: null,
+        metadata: {
+          apiName: 'ocr',
+          apiVersion: apiMetadata['ocr'][0].versionName,
+        },
+      });
+    }
+  };
+
+  const preSerialization = async (req, reply, payload, done) => {
+    if (opts?.postMlRequestBeforeSend?.apply) {
+      const res = await opts.postMlRequestBeforeSend({ req, reply, done }, {
+        apiResult: payload as any,
+        metadata: {
+          apiName: 'ocr',
+          apiVersion: apiMetadata['ocr'][0].versionName,
+        },
+      });
+
+      if (res?.error) {
+        throw res?.error;
+      }
+
+      return res?.newPayload ?? payload;
+    }
+  };
+
   fastify.route({
     url: '/v0/ocr',
-    method: ['POST'],
+    method: ['POST'], 
     schema: {
       response: {
         200: mlApiRequestResponseSchema,
@@ -106,6 +161,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
         },
       },
     },
+    preHandler,
+    preSerialization,
     handler: async (request, reply) => {
       const mlVision: MLVision = (request as any).ekycMlVision;
 
@@ -126,10 +183,12 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
           : `${opts.serverUrl}/uploads/public/${imageId}`,
       });
 
-      try {
-        opts.onMlApiResult(result, { apiName: 'ocr', apiVersion: 'v0' });
-      } catch (err) {
-        console.trace(err);
+      if (opts.onMlApiResult?.apply) {
+        try {
+          opts.onMlApiResult(result, { apiName: 'ocr', apiVersion: 'v0' });
+        } catch (err) {
+          console.trace(err);
+        }
       }
 
       reply.send(result);
@@ -156,6 +215,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
         },
       },
     },
+    preHandler,
+    preSerialization,
     handler: async (request, reply) => {
       const mlVision: MLVision = (request as any).ekycMlVision;
 

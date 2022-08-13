@@ -73,6 +73,8 @@ fastify.register(ekycRoutesPlugin, {
 
     // hook to get api result before sending
     // response to client
+    // NOTE: use `postMlRequestBeforeSend` hook instead if you want to
+    // do some processing after getting ml request
     onMlApiResult: (onMlApiResult, metadata) => {
       console.log('==== ml api result ====');
       console.log(JSON.stringify(onMlApiResult, null, 2));
@@ -91,6 +93,51 @@ fastify.listen({ port: 5000 }, err => {
 ```
 5. run the server `node main.mjs`
 6. test the endpoint `curl -X POST http://localhost:5000/v0/ocr -F image=@/path/to/national-id-card.jpg -F objectType=NATIONAL_ID_0`
+
+## Fastify Lifecycle Hook
+If you need to do something or modify response before it gets sent to the client, hook up to fastify lifecycle hook to do so
+```javascript
+// ... rest of body omitted
+
+fastify.register(ekycRoutesPlugin, {
+  // ... more options omitted
+  ekycRoutesPluginArgs: {
+    // ... more options omitted
+    // hook up to `postMlRequestBeforeSend` to do stuff with the response
+    // before it is being sent
+    // eg. modify the response, database mutation or validation etc
+    // NOTE: if used with ekycsolutions's mobile app sdk
+    // keep the payload response as it is by not returning
+    postMlRequestBeforeSend: async ({ req, reply, done }, { apiResult, metadata }) => {
+      console.log('==== ml api result ====');
+      console.log(JSON.stringify(apiResult, null, 2));
+      console.log('==== ml api metadata ====');
+      console.log(metadata);
+
+      // do your stuff here
+      // get user, insert if not exists
+      // validate business logic stuff
+      // modify response or not
+
+      // if you want to return error back as response
+      // there are multiple approach
+
+      // throw new Error('fail to validate user from backend'); // throw error directly
+
+      // return { error: new Error('fail to validate user from backend'), newPayload: null }; // return an object with non-empty error property
+
+      // reply.code(422); done(new Error('fail to validate user from backend')); // set response status code and send error back
+
+      // for more info, refer to https://www.fastify.io/docs/latest/Reference/Hooks/#preserialization
+      // since underlying of the method uses `preSerialization` hook
+    },
+    // ... more options omitted
+  },
+  // ... more options omitted
+});
+
+// ... rest of body omitted
+```
 
 # Contact
 For any other questions, feel free to contact us at <a href="https://ekycsolutions.com/">ekycsolutions.com</a>.
