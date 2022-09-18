@@ -98,11 +98,13 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
 
   const preHandler = async (req, reply, done) => {
     if (opts?.preMlRequest?.apply) {
+      const apiName = req.url.split('/')[2];
+
       await opts.preMlRequest({ req, reply, done }, {
         apiResult: null,
         metadata: {
-          apiName: 'ocr',
-          apiVersion: apiMetadata['ocr'][0].versionName,
+          apiName,
+          apiVersion: apiMetadata[apiName][0].versionName,
         },
       });
     }
@@ -110,11 +112,13 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
 
   const preSerialization = async (req, reply, payload, done) => {
     if (opts?.postMlRequestBeforeSend?.apply) {
+      const apiName = req.url.split('/')[2];
+
       const res = await opts.postMlRequestBeforeSend({ req, reply, done }, {
         apiResult: payload as any,
         metadata: {
-          apiName: 'ocr',
-          apiVersion: apiMetadata['ocr'][0].versionName,
+          apiName,
+          apiVersion: apiMetadata[apiName][0].versionName,
         },
       });
 
