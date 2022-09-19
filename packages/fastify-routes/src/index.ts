@@ -287,7 +287,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
 
       if (opts.fileStorageDriver === 's3') {
       } else {
-        writeFileSync(`/tmp/ekyc-uploads/${imageId}.0`, await body.image.toBuffer());
+        writeFileSync(`/tmp/ekyc-uploads/${imageId}`, await body.image.toBuffer());
       }
 
       const result = await mlVision.idDetection({
