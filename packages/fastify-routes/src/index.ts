@@ -94,6 +94,10 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
       version: 0,
       versionName: 'v0',
     }],
+    'id-detection': [{
+      version: 0,
+      versionName: 'v0',
+    }]
   };
 
   const preHandler = async (req, reply, done) => {
@@ -246,6 +250,55 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
       if (opts.onMlApiResult?.apply) {
         try {
           opts.onMlApiResult(result, { apiName: 'face-compare', apiVersion: 'v0' });
+        } catch (err) {
+          console.trace(err);
+        }
+      }
+
+      reply.send(result);
+    },
+  });
+
+  fastify.route({
+    url: '/v0/id-detection',
+    method: ['POST'],
+    schema: {
+      response: {
+        200: mlApiRequestResponseSchema,
+      },
+      body: {
+        type: 'object',
+        required: ['image'],
+        properties: {
+          image: {
+            $ref: '#multipartSchema',
+          },
+        },
+      },
+    },
+    preHandler,
+    preSerialization,
+    handler: async (request, reply) => {
+      const mlVision: MLVision = (request as any).ekycMlVision;
+
+      const body = request.body as any;
+
+      const imageId = nanoid(32);
+
+      if (opts.fileStorageDriver === 's3') {
+      } else {
+        writeFileSync(`/tmp/ekyc-uploads/${imageId}.0`, await body.image.toBuffer());
+      }
+
+      const result = await mlVision.idDetection({
+        imageUrl: opts.fileStorageDriver === 's3'
+          ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}`
+          : `${opts.serverUrl}/uploads/public/${imageId}`,
+      });
+
+      if (opts.onMlApiResult?.apply) {
+        try {
+          opts.onMlApiResult(result, { apiName: 'id-detection', apiVersion: 'v0' });
         } catch (err) {
           console.trace(err);
         }
