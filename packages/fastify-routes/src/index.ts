@@ -10,9 +10,9 @@ import { MLVision } from '@ekycsolutions/ml-vision';
 import { ApiResult, EkycClient, EkycClientOptions } from '@ekycsolutions/client';
 
 // import { mlApiRequestResponseSchema } from '../responses/ml_api_request';
-import { ocrSchema, ocrHandler } from '../handlers/ocr';
-import { faceCompareSchema, faceCompareHandler } from '../handlers/face_compare';
-import { idDetectionSchema, idDetectionHandler } from '../handlers/id_detection';
+import { ocrSchema, ocrHandler } from './handlers/ocr';
+import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare';
+import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
   const ekycClient = new EkycClient(opts);
