@@ -18,7 +18,7 @@
     "clean": "lerna run clean",
     "ts-compile": "lerna run tsc",
     "prepublish": "lerna run prepublish",
-    "publish": "yarn clean && lerna run tsc && lerna publish --no-private --no-push",
+    "publish-all": "lerna publish --no-private --no-push",
     "unpublish": "npm unpublish",
     "publish.local": "yarn prepublish && lerna exec 'npm publish --registry http://localhost:4873'",
     "unpublish.local": "lerna exec 'npm unpublish --force --registry http://localhost:4873'"

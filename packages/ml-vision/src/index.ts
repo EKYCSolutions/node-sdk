@@ -23,6 +23,10 @@ export interface OcrParams extends CommonMLVisionParams {
   objectType: OcrObjectType;
 }
 
+export interface IdDetectionParams extends CommonMLVisionParams {
+  imageUrl: string;
+}
+
 export class MLVision {
   constructor(private readonly ekycClient: EkycClient) {}
 
@@ -61,5 +65,22 @@ export class MLVision {
     });
 
     return await this.ekycClient.makeRequest('v0/ocr', requestOpts);
+  }
+
+  public async idDetection({ imageUrl }: Readonly<IdDetectionParams>): Promise<ApiResult> {
+    const formData = this.ekycClient.prepareFormData({
+      api: 'id-detection',
+      version: 'v0',
+    });
+
+    formData.append('image_url', imageUrl);
+
+    const requestOpts = new Options({
+      body: formData,
+      method: 'POST',
+      headers: formData.getHeaders(),
+    });
+
+    return await this.ekycClient.makeRequest('v0/id-detection', requestOpts);
   }
 }

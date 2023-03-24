@@ -1,6 +1,6 @@
 {
   "name": "@ekycsolutions/auth",
-  "version": "0.0.11",
+  "version": "0.3.0",
   "description": "auth utils to access ekycsolutions api",
   "author": "ShadowLegend <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
@@ -32,5 +32,6 @@
   },
   "dependencies": {
     "jose": "^4.6.0"
-  }
+  },
+  "gitHead": "0d164ee60782ebfbe62be706853cc7eb43a43575"
 }
