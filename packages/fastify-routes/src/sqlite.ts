@@ -40,7 +40,7 @@ export class Sqlite {
         });
     }
 
-    public getRecord(query) {
+    public queryRecord(query) {
         const db = this.dbConn;
         return new Promise(function (resolve, reject) {
             db.get(query, function(err, row) {
@@ -53,7 +53,7 @@ export class Sqlite {
         });
     }
 
-    public createRecord(query, data) {
+    public runQueryRecord(query, data) {
         const db = this.dbConn;
         return new Promise(function (resolve, reject) {
             db.run(query, data, function(err) {
