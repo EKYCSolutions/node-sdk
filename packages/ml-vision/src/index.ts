@@ -41,7 +41,7 @@ export class MLVision {
 
   public async faceCompare({ faceImage0Url, faceImage1Url }: Readonly<FaceCompareParams>) {
     const formData = this.ekycClient.prepareFormData({
-      api: 'ocr',
+      api: 'face-compare',
       version: 'v0',
     });
 
