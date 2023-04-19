@@ -52,7 +52,7 @@ export async function livenessDetectionHandler(opts, request, reply) {
           message: "liveness not enable",
         };
 
-        reply.send(errRsp); 
+        reply.code(422).send(errRsp); 
         return;
     }
 
