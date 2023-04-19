@@ -6,6 +6,7 @@ import { ApiResult, EkycClient } from '@ekycsolutions/client';
 
 export interface CommonMLVisionParams {
   version?: 0;
+  extraArgs?: {};
 }
 
 export interface FaceCompareParams extends CommonMLVisionParams {
