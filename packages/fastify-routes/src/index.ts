@@ -4,25 +4,30 @@ import { mkdirSync } from 'fs';
 import fp from 'fastify-plugin';
 import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-
 import { MLVision } from '@ekycsolutions/ml-vision';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ApiResult, EkycClient, EkycClientOptions } from '@ekycsolutions/client';
 
-// import { mlApiRequestResponseSchema } from '../responses/ml_api_request';
-import { ocrSchema, ocrHandler } from './handlers/ocr';
-import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare';
-import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection';
+import { Sqlite } from './sqlite.js';
+import { ocrSchema, ocrHandler } from './handlers/ocr.js';
+import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare.js';
+import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.js';
+import { livenessDetectionHandler, livenessDetectionSchema } from './handlers/liveness_detection.js';
+import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema } from './handlers/liveness_config.js';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
+  const sqlitePath = process.env.sqlitePath ?? '/tmp/liveness_config_db';
+  
+  const sqliteDb = new Sqlite(sqlitePath);
   const ekycClient = new EkycClient(opts);
-
   const mlVision = new MLVision(ekycClient);
 
+  fastify.decorate('sqliteDb', sqliteDb);
   fastify.decorate('ekycClient', ekycClient);
   fastify.decorate('ekycMlVision', mlVision);
 
   fastify.addHook('preHandler', (req: any, _, next) => {
+    req.sqliteDb = sqliteDb;
     req.ekycClient = ekycClient;
     req.ekycMlVision = mlVision;
     next();
@@ -142,6 +147,32 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     preHandler,
     preSerialization,
     handler: async (request, reply) => idDetectionHandler(opts, request, reply),
+  });
+  
+  fastify.route({
+    url: '/v0/liveness-detection',
+    method: ['POST'],
+    schema: livenessDetectionSchema,
+    preHandler,
+    preSerialization,
+    handler: async (request, reply) => livenessDetectionHandler(opts, request, reply),
+  });
+
+  fastify.route({
+    url: '/v0/liveness-config',
+    method: ['POST'],
+    schema: livenessUpdateSchema,
+    preHandler,
+    preSerialization,
+    handler: async (request, reply) => livenessUpdateHandler(opts, request, reply),
+  });
+
+  fastify.route({
+    url: '/v0/liveness-config',
+    method: ['GET'],
+    preHandler,
+    preSerialization,
+    handler: async (request, reply) => livenessQueryHandler(opts, request, reply),
   });
 
   next();
