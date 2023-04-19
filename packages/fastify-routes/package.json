@@ -40,7 +40,8 @@
   "dependencies": {
     "@ekycsolutions/client": "^0.4.0",
     "@ekycsolutions/ml-vision": "^0.4.0",
-    "nanoid": "^4.0.0"
+    "nanoid": "^4.0.0",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "@fastify/multipart": "^7.1.0",
