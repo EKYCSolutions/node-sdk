@@ -1,7 +1,7 @@
-import { writeFileSync } from 'fs';
 import { nanoid } from 'nanoid';
-import { MLVision, OcrObjectType } from '@ekycsolutions/ml-vision';
-import { mlApiRequestResponseSchema } from '../responses/ml_api_request'
+import { writeFileSync } from 'fs';
+import { MLVision } from '@ekycsolutions/ml-vision';
+import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
 export const idDetectionSchema = {
     response: {

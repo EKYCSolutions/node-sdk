@@ -1,7 +1,7 @@
-import { writeFileSync } from 'fs';
 import { nanoid } from 'nanoid';
+import { writeFileSync } from 'fs';
 import { MLVision } from '@ekycsolutions/ml-vision';
-import { mlApiRequestResponseSchema } from '../responses/ml_api_request'
+import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
 export const faceCompareSchema = {
     response: {
