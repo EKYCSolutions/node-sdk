@@ -37,6 +37,14 @@ export interface LivenessDetectionParams extends CommonMLVisionParams {
   sequences: LivenessDetectionSequence[];
 }
 
+export interface ManualKycParams extends CommonMLVisionParams {
+    sequences?: LivenessDetectionSequence[];
+    faceImageUrl?: string;
+    ocrImageUrl: string;
+    isRaw?: 'yes' | 'no';
+    objectType: OcrObjectType;
+}
+
 export class MLVision {
   constructor(private readonly ekycClient: EkycClient) {}
 
@@ -114,5 +122,37 @@ export class MLVision {
     });
 
     return await this.ekycClient.makeRequest('v0/liveness-detection', requestOpts);
+  }
+
+  public async manualKyc({isRaw, ocrImageUrl, faceImageUrl, objectType, sequences}: Readonly<ManualKycParams>): Promise<ApiResult> {
+
+    const formData = this.ekycClient.prepareFormData({
+      api: 'manual-kyc',
+      version: 'v0',
+    });
+
+    formData.append('is_raw', isRaw);
+    formData.append('ocr_image_url', ocrImageUrl);
+    formData.append('object_type', objectType);
+
+    if (sequences != null) {
+      for (let index = 0; index < sequences.length; index++) {
+        const sequence = sequences[index];
+        
+        formData.append(`sequences[${index}][checks]`, sequence.checks);
+        formData.append(`sequences[${index}][video_url]`, sequence.video_url);
+      }
+    }
+    else if (faceImageUrl != null) {
+      formData.append('face_image_url', faceImageUrl);
+    }
+
+    const requestOpts = new Options({
+      body: formData,
+      method: 'POST',
+      headers: formData.getHeaders(),
+    });
+
+    return await this.ekycClient.makeRequest('v0/manual-kyc', requestOpts);
   }
 }
