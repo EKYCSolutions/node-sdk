@@ -29,8 +29,8 @@ export interface IdDetectionParams extends CommonMLVisionParams {
 }
 
 export interface LivenessDetectionSequence {
-    video_url: string;
-    checks: string;
+  video_url: string;
+  checks: string;
 }
 
 export interface LivenessDetectionParams extends CommonMLVisionParams {
@@ -38,15 +38,15 @@ export interface LivenessDetectionParams extends CommonMLVisionParams {
 }
 
 export interface ManualKycParams extends CommonMLVisionParams {
-    sequences?: LivenessDetectionSequence[];
-    faceImageUrl?: string;
-    ocrImageUrl: string;
-    isRaw?: 'yes' | 'no';
-    objectType: OcrObjectType;
+  sequences: LivenessDetectionSequence[];
+  faceImageUrl: string;
+  ocrImageUrl: string;
+  isRaw?: 'yes' | 'no';
+  objectType: OcrObjectType;
 }
 
 export class MLVision {
-  constructor(private readonly ekycClient: EkycClient) {}
+  constructor(private readonly ekycClient: EkycClient) { }
 
   public async faceCompare({ faceImage0Url, faceImage1Url }: Readonly<FaceCompareParams>) {
     const formData = this.ekycClient.prepareFormData({
@@ -110,7 +110,7 @@ export class MLVision {
 
     for (let index = 0; index < sequences.length; index++) {
       const sequence = sequences[index];
-      
+
       formData.append(`sequences[${index}][checks]`, sequence.checks);
       formData.append(`sequences[${index}][video_url]`, sequence.video_url);
     }
@@ -124,7 +124,7 @@ export class MLVision {
     return await this.ekycClient.makeRequest('v0/liveness-detection', requestOpts);
   }
 
-  public async manualKyc({isRaw, ocrImageUrl, faceImageUrl, objectType, sequences}: Readonly<ManualKycParams>): Promise<ApiResult> {
+  public async manualKyc({ isRaw, ocrImageUrl, faceImageUrl, objectType, sequences }: Readonly<ManualKycParams>): Promise<ApiResult> {
 
     const formData = this.ekycClient.prepareFormData({
       api: 'manual-kyc',
@@ -132,19 +132,15 @@ export class MLVision {
     });
 
     formData.append('is_raw', isRaw);
-    formData.append('ocr_image_url', ocrImageUrl);
     formData.append('object_type', objectType);
+    formData.append('ocr_image_url', ocrImageUrl);
+    formData.append('face_image_url', faceImageUrl);
 
-    if (sequences != null) {
-      for (let index = 0; index < sequences.length; index++) {
-        const sequence = sequences[index];
-        
-        formData.append(`sequences[${index}][checks]`, sequence.checks);
-        formData.append(`sequences[${index}][video_url]`, sequence.video_url);
-      }
-    }
-    else if (faceImageUrl != null) {
-      formData.append('face_image_url', faceImageUrl);
+    for (let index = 0; index < sequences.length; index++) {
+      const sequence = sequences[index];
+
+      formData.append(`sequences[${index}][checks]`, sequence.checks);
+      formData.append(`sequences[${index}][video_url]`, sequence.video_url);
     }
 
     const requestOpts = new Options({
