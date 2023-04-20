@@ -61,7 +61,7 @@ export async function livenessDetectionHandler(opts, request, reply) {
     const checks = body.checks;
     const videos = body.videos;
 
-    const postBody = [];
+    const sequences = [];
     const videoId = nanoid(32);
     
     for (let index = 0; index < checks.length; index++) {
@@ -79,14 +79,14 @@ export async function livenessDetectionHandler(opts, request, reply) {
             url = `${opts.serverUrl}/uploads/public/${fileName}`;  
         }
 
-        postBody.push({
+        sequences.push({
             video_url: url,
             checks: check.value
         });
     }
     
     const result = await mlVision.livenessDetection({
-        sequences: postBody
+        sequences: sequences 
     });
 
     if (opts.onMlApiResult?.apply) {
