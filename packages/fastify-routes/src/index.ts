@@ -14,6 +14,7 @@ import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare.j
 import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.js';
 import { livenessDetectionHandler, livenessDetectionSchema } from './handlers/liveness_detection.js';
 import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema } from './handlers/liveness_config.js';
+import { manualKycHandler, manualKycSchema } from './handlers/manual_kyc.js';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
   const sqlitePath = process.env.sqlitePath ?? '/tmp/liveness_config_db';
@@ -87,6 +88,14 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
       versionName: 'v0',
     }],
     'id-detection': [{
+      version: 0,
+      versionName: 'v0',
+    }],
+    'liveness-detection': [{
+      version: 0,
+      versionName: 'v0',
+    }],
+    'manual-kyc': [{
       version: 0,
       versionName: 'v0',
     }]
@@ -173,6 +182,15 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     preHandler,
     preSerialization,
     handler: async (request, reply) => livenessQueryHandler(opts, request, reply),
+  });
+
+  fastify.route({
+    url: '/v0/manual-kyc',
+    method: ['POST'],
+    schema: manualKycSchema,
+    preHandler,
+    preSerialization,
+    handler: async (request, reply) => manualKycHandler(opts, request, reply),
   });
 
   next();
