@@ -11,7 +11,7 @@ export const manualKycSchema = {
     consumes: ["multipart/form-data"],
     body: {
         type: 'object',
-        required: ['ocrImage', 'objectType'],
+        required: ['faceImage', 'ocrImage', 'objectType'],
         properties: {
             videos: {
                 type: 'array',
@@ -24,7 +24,7 @@ export const manualKycSchema = {
                 items: {
                     required: ['value'],
                     properties: {
-                        value: { 
+                        value: {
                             type: 'string',
                             enum: ['left', 'right', 'blink']
                         }
@@ -59,7 +59,7 @@ export const manualKycSchema = {
     },
 };
 
-async function map_file_upload(opts, fileName, file) : Promise<string> {
+async function map_file_upload(opts, fileName, file): Promise<string> {
 
     if (opts.fileStorageDriver === 's3') {
         // url = `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${fileName}`;
@@ -68,8 +68,8 @@ async function map_file_upload(opts, fileName, file) : Promise<string> {
     }
 
     return opts.fileStorageDriver === 's3'
-            ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${fileName}`
-            : `${opts.serverUrl}/uploads/public/${fileName}`;
+        ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${fileName}`
+        : `${opts.serverUrl}/uploads/public/${fileName}`;
 }
 
 export async function manualKycHandler(opts, request, reply) {
@@ -79,39 +79,32 @@ export async function manualKycHandler(opts, request, reply) {
     const videos = body.videos;
 
     const fileId = nanoid(32);
-    
+
     const requestBody: ManualKycParams = {
+        sequences: [],
+        faceImageUrl: await map_file_upload(opts, `${fileId}.face`, body.faceImage),
         ocrImageUrl: await map_file_upload(opts, `${fileId}.ocr`, body.ocrImage),
         isRaw: body?.isRaw?.value ?? 'yes',
         objectType: body.objectType.value
     };
 
-    const sequences = [];
-    
-    if ((checks == null || videos == null) && body.faceImage == null) {
-        const errRsp = {
-          message: "face image or video is required",
-        };
-
-        reply.code(400).send(errRsp); 
-        return;
-    }
-
     if (checks != null && videos != null) {
         // run livenessDetection
+
+        const sequences = [];
         const sqliteDb: Sqlite = (request as any).sqliteDb;
         const livenessConfig = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.livenessTable} LIMIT 1`);
-        
+
         // @ts-ignore
         if (livenessConfig != null && livenessConfig.enable == 'no') {
             const errRsp = {
                 message: "liveness not enable",
             };
 
-            reply.code(422).send(errRsp); 
+            reply.code(422).send(errRsp);
             return;
         }
-        
+
         for (let index = 0; index < checks.length; index++) {
             const check = checks[index].value;
 
@@ -123,10 +116,7 @@ export async function manualKycHandler(opts, request, reply) {
 
         requestBody.sequences = sequences;
     }
-    else {
-        requestBody.faceImageUrl = await map_file_upload(opts, `${fileId}.face`, body.faceImage);
-    }
-    
+
     const result = await mlVision.manualKyc(requestBody);
 
     if (opts.onMlApiResult?.apply) {
