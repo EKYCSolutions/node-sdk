@@ -2,6 +2,7 @@ import sqlite3 from "sqlite3";
 
 export class Sqlite {
     public readonly dbConn: sqlite3.Database;
+    public readonly apiTokenTable = 'api_token';
     public readonly livenessTable = 'liveness_config';
 
     constructor(sqliteDb: string) {
@@ -38,12 +39,20 @@ export class Sqlite {
                 }
             });
         });
+
+        db.run(`CREATE TABLE IF NOT EXISTS ${this.apiTokenTable} (
+            token TEXT PRIMARY KEY
+        )`, [], (err) => {
+            if (err) {
+                console.log(err);
+            }
+        });
     }
 
-    public queryRecord(query) {
+    public queryRecord(query, params = []) {
         const db = this.dbConn;
         return new Promise(function (resolve, reject) {
-            db.get(query, function(err, row) {
+            db.get(query, params, function(err, row) {
                 if (err) {
                     reject(err);
                 }
