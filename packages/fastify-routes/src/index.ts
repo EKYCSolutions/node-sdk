@@ -13,10 +13,10 @@ import { EkycRoutesOpts } from './types.js';
 import { apiMetadata } from './api-metadata.js';
 import { ocrSchema, ocrHandler } from './handlers/ocr.js';
 import { Middleware, middlewares } from './middlewares/index.js';
-import { tokenCreateHandler, tokenCreateSchema } from './handlers/token.js';
 import { manualKycHandler, manualKycSchema } from './handlers/manual_kyc.js';
 import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare.js';
 import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.js';
+import { tokenCreateHandler, tokenCreateSchema, tokenDeleteHandler } from './handlers/token.js';
 import { livenessDetectionHandler, livenessDetectionSchema } from './handlers/liveness_detection.js';
 import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema } from './handlers/liveness_config.js';
 
@@ -86,6 +86,13 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     schema: tokenCreateSchema,
     preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
     handler: async (request, reply) => tokenCreateHandler(opts, request, reply),
+  });
+  
+  fastify.route({
+    url: '/v0/token',
+    method: ['DELETE'],
+    preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
+    handler: async (request, reply) => tokenDeleteHandler(opts, request, reply),
   });
 
   fastify.route({
