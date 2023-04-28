@@ -23,3 +23,11 @@ export async function tokenCreateHandler(_opts, request: FastifyRequest, reply) 
 
   reply.send(token);
 }
+
+export async function tokenDeleteHandler(_opts, request: FastifyRequest, reply) {
+  const sqliteDb: Sqlite = (request as any).sqliteDb;
+
+  await sqliteDb.runQueryRecord(`delete from ${sqliteDb.apiTokenTable} where token = ?`, [(request.body as any).token.value]);
+
+  reply.send('');
+}
