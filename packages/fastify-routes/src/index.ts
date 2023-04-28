@@ -19,9 +19,10 @@ import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.j
 import { tokenCreateHandler, tokenCreateSchema, tokenDeleteHandler } from './handlers/token.js';
 import { livenessDetectionHandler, livenessDetectionSchema } from './handlers/liveness_detection.js';
 import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema } from './handlers/liveness_config.js';
+import { manualKycQueryHandler, manualKycUpdateHandler, manualKycUpdateSchema } from './handlers/manual_kyc_config.js';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
-  const sqlitePath = process.env.sqlitePath ?? '/tmp/liveness_config_db';
+  const sqlitePath = process.env.sqlitePath ?? '/tmp/ekyc_db';
   
   const sqliteDb = new Sqlite(sqlitePath);
   const ekycClient = new EkycClient(opts);
@@ -145,6 +146,22 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['GET'],
     preSerialization,
     handler: async (request, reply) => livenessQueryHandler(opts, request, reply),
+  });
+
+  fastify.route({
+    url: '/v0/manual-kyc-config',
+    method: ['POST'],
+    schema: manualKycUpdateSchema,
+    preSerialization,
+    preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
+    handler: async (request, reply) => manualKycUpdateHandler(opts, request, reply),
+  });
+
+  fastify.route({
+    url: '/v0/manual-kyc-config',
+    method: ['GET'],
+    preSerialization,
+    handler: async (request, reply) => manualKycQueryHandler(opts, request, reply),
   });
 
   fastify.route({
