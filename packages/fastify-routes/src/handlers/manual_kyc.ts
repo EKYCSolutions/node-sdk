@@ -73,6 +73,7 @@ async function map_file_upload(opts, fileName, file): Promise<string> {
 }
 
 export async function manualKycHandler(opts, request, reply) {
+    const sqliteDb: Sqlite = (request as any).sqliteDb;
     const mlVision: MLVision = (request as any).ekycMlVision;
     const body = request.body as any;
     const checks = body.checks;
@@ -92,13 +93,12 @@ export async function manualKycHandler(opts, request, reply) {
         // run livenessDetection
 
         const sequences = [];
-        const sqliteDb: Sqlite = (request as any).sqliteDb;
         const livenessConfig = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.livenessTable} LIMIT 1`);
 
         // @ts-ignore
         if (livenessConfig != null && livenessConfig.enable == 'no') {
             const errRsp = {
-                message: "liveness not enable",
+                message: "Liveness detection not enable",
             };
 
             reply.code(422).send(errRsp);
@@ -115,6 +115,20 @@ export async function manualKycHandler(opts, request, reply) {
         }
 
         requestBody.sequences = sequences;
+    }
+    else {
+        // check for enable config of manual kyc
+        const manualKycConfig = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.manualKycTable} LIMIT 1`);
+
+        // @ts-ignore
+        if (manualKycConfig != null && manualKycConfig.enable == 'no') {
+            const errRsp = {
+                message: "Manual check kyc not enable",
+            };
+
+            reply.code(422).send(errRsp);
+            return;
+        }
     }
 
     const result = await mlVision.manualKyc(requestBody);
