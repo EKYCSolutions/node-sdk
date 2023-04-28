@@ -2,19 +2,23 @@
 import { mkdirSync } from 'fs';
 
 import fp from 'fastify-plugin';
+import { FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
 import { MLVision } from '@ekycsolutions/ml-vision';
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ApiResult, EkycClient, EkycClientOptions } from '@ekycsolutions/client';
+import { EkycClient, EkycClientOptions } from '@ekycsolutions/client';
 
 import { Sqlite } from './sqlite.js';
+import { EkycRoutesOpts } from './types.js';
+import { apiMetadata } from './api-metadata.js';
 import { ocrSchema, ocrHandler } from './handlers/ocr.js';
+import { Middleware, middlewares } from './middlewares/index.js';
+import { tokenCreateHandler, tokenCreateSchema } from './handlers/token.js';
+import { manualKycHandler, manualKycSchema } from './handlers/manual_kyc.js';
 import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare.js';
 import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.js';
 import { livenessDetectionHandler, livenessDetectionSchema } from './handlers/liveness_detection.js';
 import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema } from './handlers/liveness_config.js';
-import { manualKycHandler, manualKycSchema } from './handlers/manual_kyc.js';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
   const sqlitePath = process.env.sqlitePath ?? '/tmp/liveness_config_db';
@@ -40,78 +44,19 @@ export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOp
   name: '@ekycsolutions/fastify-ekyc',
 });
 
-export interface OnMlApiMetadata {
-  apiName: string;
-  apiVersion: string;
-}
-
-export interface FastifyLifecycleHookMlContext {
-  apiResult: ApiResult;
-  metadata: OnMlApiMetadata;
-}
-
-export interface FastifyLifecycleHookContext {
-  done: any;
-  req: FastifyRequest;
-  reply: FastifyReply;
-}
-
-export interface EkycRoutesOpts {
-  serverUrl: string;
-  isServeUploadFiles?: boolean;
-  fileStorageDriver: 's3' | 'local';
-  onMlApiResult?: (mlApiResult: ApiResult, metadata: OnMlApiMetadata) => any;
-  preMlRequest?: (fastifyContext: FastifyLifecycleHookContext, mlContext: FastifyLifecycleHookMlContext) => Promise<void>;
-  postMlRequestBeforeSend?: (fastifyContext: FastifyLifecycleHookContext, mlContext: FastifyLifecycleHookMlContext) =>
-    Promise<{ error: any; newPayload: any; }>;
-  s3?: {
-    host: string;
-    port: number;
-    scheme: string;
-    bucket: string;
-    region: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-  };
-}
-
 export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOpts, next) => {
-  mkdirSync('/tmp/ekyc-uploads', { recursive: true });
+  mkdirSync('/tmp/ekyc-uploads', { recursive: true }); 
 
-  const apiMetadata = {
-    'ocr': [{
-      version: 0,
-      versionName: 'v0',
-    }],
-    'face-compare': [{
-      version: 0,
-      versionName: 'v0',
-    }],
-    'id-detection': [{
-      version: 0,
-      versionName: 'v0',
-    }],
-    'liveness-detection': [{
-      version: 0,
-      versionName: 'v0',
-    }],
-    'manual-kyc': [{
-      version: 0,
-      versionName: 'v0',
-    }]
-  };
+  fastify.decorate('ekycRoutesOpts', opts);
 
-  const preHandler = async (req, reply, done) => {
-    if (opts?.preMlRequest?.apply) {
-      const apiName = req.url.split('/')[2];
+  fastify.addHook('preHandler', (req: any, _, next) => {
+    req.ekycRoutesOpts = opts;
+    next();
+  });
 
-      await opts.preMlRequest({ req, reply, done }, {
-        apiResult: null,
-        metadata: {
-          apiName,
-          apiVersion: apiMetadata[apiName][0].versionName,
-        },
-      });
+  const applyMiddies = (middies: Middleware[]) => async (req, reply) => {
+    for (const middie in middies) {
+      await middlewares[middies[middie]](req, reply);
     }
   };
 
@@ -119,7 +64,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     if (opts?.postMlRequestBeforeSend?.apply) {
       const apiName = req.url.split('/')[2];
 
-      const res = await opts.postMlRequestBeforeSend({ req, reply, done }, {
+      const res = await opts.postMlRequestBeforeSend({ req, reply }, {
         apiResult: payload as any,
         metadata: {
           apiName,
@@ -136,9 +81,19 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
   };
 
   fastify.route({
+    url: '/v0/token',
+    method: ['POST'],
+    schema: tokenCreateSchema,
+    preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
+    handler: async (request, reply) => tokenCreateHandler(opts, request, reply),
+  });
+
+  fastify.route({
     url: '/v0/ocr',
     method: ['POST'],
     schema: ocrSchema,
+    preSerialization,
+    preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
     handler: async (request, reply) => ocrHandler(opts, request, reply),
   });
 
@@ -146,6 +101,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     url: '/v0/face-compare',
     method: ['POST'],
     schema: faceCompareSchema,
+    preSerialization,
+    preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
     handler: async (request, reply) => faceCompareHandler(opts, request, reply),
   });
 
@@ -153,8 +110,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     url: '/v0/id-detection',
     method: ['POST'],
     schema: idDetectionSchema,
-    preHandler,
     preSerialization,
+    preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
     handler: async (request, reply) => idDetectionHandler(opts, request, reply),
   });
   
@@ -162,8 +119,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     url: '/v0/liveness-detection',
     method: ['POST'],
     schema: livenessDetectionSchema,
-    preHandler,
     preSerialization,
+    preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
     handler: async (request, reply) => livenessDetectionHandler(opts, request, reply),
   });
 
@@ -171,15 +128,14 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     url: '/v0/liveness-config',
     method: ['POST'],
     schema: livenessUpdateSchema,
-    preHandler,
     preSerialization,
+    preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
     handler: async (request, reply) => livenessUpdateHandler(opts, request, reply),
   });
 
   fastify.route({
     url: '/v0/liveness-config',
     method: ['GET'],
-    preHandler,
     preSerialization,
     handler: async (request, reply) => livenessQueryHandler(opts, request, reply),
   });
@@ -188,8 +144,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     url: '/v0/manual-kyc',
     method: ['POST'],
     schema: manualKycSchema,
-    preHandler,
     preSerialization,
+    preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
     handler: async (request, reply) => manualKycHandler(opts, request, reply),
   });
 
