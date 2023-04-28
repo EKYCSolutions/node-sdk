@@ -4,6 +4,7 @@ export class Sqlite {
     public readonly dbConn: sqlite3.Database;
     public readonly apiTokenTable = 'api_token';
     public readonly livenessTable = 'liveness_config';
+    public readonly manualKycTable = 'manual_kyc_config';
 
     constructor(sqliteDb: string) {
         this.dbConn = new sqlite3.Database(sqliteDb, (err) => {
@@ -16,29 +17,8 @@ export class Sqlite {
         
         const db = this.dbConn;
 
-        // 1. check if table not exist -> create table
-        db.run(`CREATE TABLE IF NOT EXISTS ${this.livenessTable} (
-                enable TEXT CHECK( enable IN ('yes','no') ) NOT NULL DEFAULT 'yes'
-            )`, [], (err) => {
-            if (err) {
-                console.log(err);
-            }
-            
-            // 2. query record from table -> if null insert record
-            db.get(`SELECT enable from ${this.livenessTable} LIMIT 1`, (err, row) => {
-                if (err) {
-                    console.log(err);
-                }
-
-                if (row == null) {
-                    db.run(`INSERT INTO ${this.livenessTable} VALUES('yes')`, [], (err) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });       
-                }
-            });
-        });
+        this.createToggleFeatureTable(this.livenessTable, db);
+        this.createToggleFeatureTable(this.manualKycTable, db);
 
         db.run(`CREATE TABLE IF NOT EXISTS ${this.apiTokenTable} (
             token TEXT PRIMARY KEY
@@ -47,6 +27,32 @@ export class Sqlite {
                 console.log(err);
             }
         });
+    }
+
+    private createToggleFeatureTable(tableName: string, db: sqlite3.Database) {
+        // 1. check if table not exist -> create table
+        db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (
+            enable TEXT CHECK( enable IN ('yes','no') ) NOT NULL DEFAULT 'yes'
+        )`, [], (err) => {
+        if (err) {
+            console.log(err);
+        }
+        
+        // 2. query record from table -> if null insert record
+        db.get(`SELECT enable from ${tableName} LIMIT 1`, (err, row) => {
+            if (err) {
+                console.log(err);
+            }
+
+            if (row == null) {
+                db.run(`INSERT INTO ${tableName} VALUES('yes')`, [], (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });       
+            }
+        });
+    });
     }
 
     public queryRecord(query, params = []) {
