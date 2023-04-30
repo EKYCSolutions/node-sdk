@@ -109,7 +109,9 @@ export class EkycClient {
   }
 
   public async apiResultPolling(responseId: string): Promise<ApiResult> {
+    let waitTime = 0;
     let retryCount = 0;
+    let waitTimeMultiplier = 0;
 
     while (true) {
       try {
@@ -145,9 +147,11 @@ export class EkycClient {
           };
         }
 
-        const exp = Math.pow(1.32, retryCount);
+        const exp = Math.pow(1.32, waitTimeMultiplier);
 
-        if (exp > this.maxRequestTimeoutAsSec) {
+        waitTime += exp;
+
+        if (waitTime > this.maxRequestTimeoutAsSec) {
           return {
             isSuccess: false,
             data: { responseId, result: null },
@@ -162,6 +166,8 @@ export class EkycClient {
         await this.sleep(exp);
 
         retryCount += 1;
+
+        waitTimeMultiplier = retryCount % 4;
       } catch (err) {
         return {
           isSuccess: false,
