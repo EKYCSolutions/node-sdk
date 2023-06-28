@@ -9,7 +9,10 @@
   "typings": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./*": "./dist/*",
+    "./browser": {
+      "import": "./dist/browser.js",
+      "types": "./dist/browser.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -32,7 +35,9 @@
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
   },
   "dependencies": {
-    "@ekycsolutions/auth": "^0.4.0"
+    "@ekycsolutions/auth": "^0.4.0",
+    "@ekycsolutions/auth-browser": "^0.4.0",
+    "axios": "^1.4.0"
   },
   "gitHead": "0d164ee60782ebfbe62be706853cc7eb43a43575"
 }
