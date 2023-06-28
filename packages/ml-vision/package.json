@@ -9,6 +9,10 @@
   "typings": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
+    "./browser": {
+      "import": "./dist/browser.js",
+      "types": "./dist/browser.d.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -31,7 +35,7 @@
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
   },
   "dependencies": {
-    "form-data": "^4.0.0"
+    "axios": "^1.4.0"
   },
   "peerDependencies": {
     "@ekycsolutions/client": ">=0.0.0"
