@@ -18,10 +18,16 @@ export const createPublishableKey = async () => {
   const clientPubKey = window.btoa(String.fromCharCode.apply(null, x25519.getPublicKey(clientP)));
 
   return {
-    k,
-    s,
-    clientK,
-    clientPubKey,
-    clientP: window.btoa(String.fromCharCode.apply(null, clientP)),
+    toSave: () => ({
+      client_auth_key_salt: s,
+      client_auth_key: clientK,
+      client_public_key: clientPubKey,
+    }),
+    toDownloadJson: ({ appId, keyId }) => ({
+      key_id: keyId,
+      app_id: appId,
+      client_key: k,
+      client_pkey: window.btoa(String.fromCharCode.apply(null, clientP)),
+    }),
   };
 };
