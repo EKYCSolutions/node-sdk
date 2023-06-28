@@ -15,7 +15,7 @@ export interface PublishableApiKey {
 }
 
 export interface AuthBrowserOpts {
-  serverAddress: string;
+  serverAddress?: string;
   apiKey: PublishableApiKey;
 }
 
@@ -30,6 +30,7 @@ export class AuthBrowser {
     this.apiKey = apiKey;
     this.serverAddress = serverAddress;
     this.httpClient = axios.create({
+      withCredentials: true,
       baseURL: this.serverAddress,
     });
   }
