@@ -3,13 +3,22 @@ import { ApiResult } from '@ekycsolutions/client';
 import { EkycClientBrowser } from '@ekycsolutions/client/dist/browser';
 import {
   OcrParams,
-  ManualKycParams,
+  OcrObjectType,
   FaceCompareParams,
   IdDetectionParams,
+  CommonMLVisionParams,
   LivenessDetectionParams,
 } from './interface.js';
 
 export * from './interface.js';
+
+export interface ManualKycParamsWithImage extends CommonMLVisionParams {
+  ocrImage: File;
+  faceImage: File;
+  isRaw?: 'yes' | 'no';
+  objectType: OcrObjectType;
+  sequences: { checks: string; video: File; }[];
+}
 
 export class MLVisionBrowser {
   constructor(private readonly ekycClient: EkycClientBrowser) { }
@@ -66,8 +75,7 @@ export class MLVisionBrowser {
     return await this.ekycClient.makeRequest('v0/liveness-detection', formData);
   }
 
-  public async manualKyc({ isRaw, ocrImageUrl, faceImageUrl, objectType, sequences }: Readonly<ManualKycParams>): Promise<ApiResult> {
-
+  public async manualKyc({ isRaw, ocrImage, faceImage, objectType, sequences }: Readonly<ManualKycParamsWithImage>): Promise<ApiResult> {
     const formData = this.ekycClient.prepareFormData({
       api: 'manual-kyc',
       version: 'v0',
@@ -75,14 +83,14 @@ export class MLVisionBrowser {
 
     formData.append('is_raw', isRaw);
     formData.append('object_type', objectType);
-    formData.append('ocr_image_url', ocrImageUrl);
-    formData.append('face_image_url', faceImageUrl);
+    formData.append('ocr_image', ocrImage);
+    formData.append('face_image', faceImage);
 
     for (let index = 0; index < sequences.length; index++) {
       const sequence = sequences[index];
 
+      formData.append(`sequences[${index}][video]`, sequence.video);
       formData.append(`sequences[${index}][checks]`, sequence.checks);
-      formData.append(`sequences[${index}][video_url]`, sequence.video_url);
     }
 
     return await this.ekycClient.makeRequest('v0/manual-kyc', formData);
