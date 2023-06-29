@@ -45,10 +45,6 @@ export class EkycClientBrowser {
 
     requestOpts.headers['Content-Type'] = 'multipart/form-data';
 
-    console.log(formData);
-    console.log(endpoint);
-    console.log({ ...requestOpts, withCredentials: true });
-
     const mlRequestResult = (await axios.post(
       `${this.serverAddress}/${endpoint}`, formData, { ...requestOpts, withCredentials: true })).data;
 
