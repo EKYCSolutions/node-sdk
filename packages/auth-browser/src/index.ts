@@ -8,10 +8,11 @@ import { bytesToHex } from '@noble/hashes/utils';
 export { createPublishableKey } from './utils/create-key.js';
 
 export interface PublishableApiKey {
-  key_id: string;
+  key_id?: string;
   app_id?: string;
-  client_key: string;
-  client_pkey: string;
+  api_key?: string;
+  client_key?: string;
+  client_pkey?: string;
 }
 
 export interface AuthBrowserOpts {
@@ -36,6 +37,14 @@ export class AuthBrowser {
   }
 
   async getRequestOpts() {
+    if (this.apiKey.api_key) {
+      return {
+        headers: {
+          'x-api-key': this.apiKey.api_key,
+        },
+      };
+    }
+
     if (this.token?.exp) {
       if (new Date(this.token.exp * 1000 - 800) >= new Date()) {
         return {
