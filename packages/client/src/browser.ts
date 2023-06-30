@@ -1,5 +1,5 @@
 
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 import { apiResultPolling } from './utils.js';
 import { PrepareFormDataMeta, ApiResult } from './interface.js';
@@ -19,11 +19,17 @@ export class EkycClientBrowser {
   readonly serverAddress: string;
   readonly maxRequestTimeoutAsSec: number;
 
+  private readonly client: AxiosInstance;
+
   constructor({ auth, serverAddress, maxRequestTimeoutAsSec }: Readonly<EkycClientBrowserOptions>) {
     const srvAddress = serverAddress ?? 'https://server.ews.ekycsolutions.com';
     this.serverAddress = srvAddress;
     this.maxRequestTimeoutAsSec = maxRequestTimeoutAsSec ?? 64;
     this.auth = new AuthBrowser({ ...auth, serverAddress: srvAddress });
+    this.client = axios.create({
+      baseURL: serverAddress,
+      withCredentials: !!!auth.apiKey.api_key,
+    });
   }
 
   public async getRequestOpts(): Promise<{ [key: string]: any; }> {
@@ -45,8 +51,8 @@ export class EkycClientBrowser {
 
     requestOpts.headers['Content-Type'] = 'multipart/form-data';
 
-    const mlRequestResult = (await axios.post(
-      `${this.serverAddress}/${endpoint}`, formData, { ...requestOpts, withCredentials: true })).data;
+    const mlRequestResult = (await this.client.post(
+      `/${endpoint}`, formData, { ...requestOpts })).data;
 
     if (mlRequestResult?.id) {
       return await this.apiResultPolling(mlRequestResult.id);
@@ -59,9 +65,9 @@ export class EkycClientBrowser {
     return apiResultPolling({
       responseId,
       maxRequestTimeoutAsSec: this.maxRequestTimeoutAsSec,
-      getRes: async () => (await axios.post(
-        `${this.serverAddress}/v0/api-request-reply/${responseId}`,
-        {}, { ...(await this.getRequestOpts()), withCredentials: true }
+      getRes: async () => (await this.client.post(
+        `/v0/api-request-reply/${responseId}`,
+        {}, { ...(await this.getRequestOpts()) }
       )).data,
     });
   }
