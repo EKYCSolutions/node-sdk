@@ -31,8 +31,8 @@ export class AuthBrowser {
     this.apiKey = apiKey;
     this.serverAddress = serverAddress;
     this.httpClient = axios.create({
-      withCredentials: true,
       baseURL: this.serverAddress,
+      withCredentials: !!!this.apiKey.api_key,
     });
   }
 
