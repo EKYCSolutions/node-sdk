@@ -65,9 +65,9 @@ export class EkycClientBrowser {
     return apiResultPolling({
       responseId,
       maxRequestTimeoutAsSec: this.maxRequestTimeoutAsSec,
-      getRes: async () => (await this.client.post(
+      getRes: async () => (await this.client.get(
         `/v0/api-request-reply/${responseId}`,
-        {}, { ...(await this.getRequestOpts()) }
+        { ...(await this.getRequestOpts()) }
       )).data,
     });
   }
