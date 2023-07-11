@@ -18,12 +18,12 @@ import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare.j
 import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.js';
 import { tokenCreateHandler, tokenCreateSchema, tokenDeleteHandler } from './handlers/token.js';
 import { livenessDetectionHandler, livenessDetectionSchema } from './handlers/liveness_detection.js';
-import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema } from './handlers/liveness_config.js';
+import { livenessQueryHandler, livenessUpdateHandler, livenessUpdateSchema, livenessGetConfigSchema } from './handlers/liveness_config.js';
 import { manualKycQueryHandler, manualKycUpdateHandler, manualKycUpdateSchema } from './handlers/manual_kyc_config.js';
 
 export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOptions, next) => {
   const sqlitePath = process.env.sqlitePath ?? '/tmp/ekyc_db';
-  
+
   const sqliteDb = new Sqlite(sqlitePath);
   const ekycClient = new EkycClient(opts);
   const mlVision = new MLVision(ekycClient);
@@ -46,7 +46,7 @@ export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOp
 });
 
 export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOpts, next) => {
-  mkdirSync('/tmp/ekyc-uploads', { recursive: true }); 
+  mkdirSync('/tmp/ekyc-uploads', { recursive: true });
 
   fastify.decorate('ekycRoutesOpts', opts);
 
@@ -88,7 +88,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
     handler: async (request, reply) => tokenCreateHandler(opts, request, reply),
   });
-  
+
   fastify.route({
     url: '/v0/token',
     method: ['DELETE'],
@@ -122,7 +122,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
     handler: async (request, reply) => idDetectionHandler(opts, request, reply),
   });
-  
+
   fastify.route({
     url: '/v0/liveness-detection',
     method: ['POST'],
@@ -144,6 +144,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
   fastify.route({
     url: '/v0/liveness-config',
     method: ['GET'],
+    schema: livenessGetConfigSchema,
     preSerialization,
     handler: async (request, reply) => livenessQueryHandler(opts, request, reply),
   });
