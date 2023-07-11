@@ -1,18 +1,14 @@
 {
-  "name": "@ekycsolutions/client",
+  "name": "@ekycsolutions/auth-browser",
   "version": "0.5.1-alpha.0",
-  "description": "entrypoint, api client to interact with ekycsolutions api",
-  "author": "ShadowLegend <lyheng0@gmail.com>",
+  "description": "> TODO: description",
+  "author": "xshadowlegendx <lyheng0@gmail.com>",
   "homepage": "https://gitlab.com/ekycsolutions/node-sdk#readme",
   "license": "ISC",
   "type": "module",
   "typings": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./browser": {
-      "import": "./dist/browser.js",
-      "types": "./dist/browser.d.ts"
-    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -35,9 +31,9 @@
     "url": "https://gitlab.com/ekycsolutions/node-sdk/issues"
   },
   "dependencies": {
-    "@ekycsolutions/auth": "^0.5.1-alpha.0",
-    "@ekycsolutions/auth-browser": "^0.5.1-alpha.0",
-    "axios": "^1.4.0"
-  },
-  "gitHead": "0d164ee60782ebfbe62be706853cc7eb43a43575"
+    "@noble/curves": "^1.1.0",
+    "@noble/hashes": "^1.3.1",
+    "axios": "^1.4.0",
+    "nanoid": "^4.0.2"
+  }
 }
