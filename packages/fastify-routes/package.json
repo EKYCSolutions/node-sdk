@@ -40,6 +40,7 @@
   "dependencies": {
     "@ekycsolutions/client": "^0.5.2-alpha.2",
     "@ekycsolutions/ml-vision": "^0.5.2-alpha.2",
+    "@fastify/cors": "^8.3.0",
     "nanoid": "^4.0.0",
     "sqlite3": "^5.1.6"
   },

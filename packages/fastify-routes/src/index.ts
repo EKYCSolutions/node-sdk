@@ -2,6 +2,7 @@
 import { mkdirSync } from 'fs';
 
 import fp from 'fastify-plugin';
+import cors from '@fastify/cors';
 import { FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
@@ -187,6 +188,14 @@ export const ekycRoutesPlugin = fp(async (
     ekycRoutesPluginArgs: EkycRoutesOpts;
   }
 ) => {
+  if (process.env.IS_ENABLE_CORS === 'yes') {
+    fastify.register(cors, {
+      credentials: false,
+      origin: process.env.CORS_ORIGINS.split(','),
+      methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    });
+  }
+
   fastify.register(fastifyMultipart, {
     attachFieldsToBody: true,
     sharedSchemaId: '#multipartSchema',
