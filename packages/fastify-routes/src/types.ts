@@ -24,6 +24,7 @@ export interface EkycRoutesOpts {
 export interface OnMlApiMetadata {
   apiName: string;
   apiVersion: string;
+  mlReqArgs?: any;
 }
 
 export interface FastifyLifecycleHookMlContext {
