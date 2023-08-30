@@ -1,5 +1,9 @@
-import { nanoid } from 'nanoid';
+
 import { writeFileSync } from 'fs';
+
+import { nanoid } from 'nanoid';
+
+import { EkycRoutesOpts } from '../types.js';
 import { MLVision, OcrObjectType } from '@ekycsolutions/ml-vision';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
@@ -36,7 +40,9 @@ export const ocrSchema = {
     },
 };
 
-export async function ocrHandler(opts, request, reply) {
+export async function ocrHandler(request, reply) {
+    const opts: EkycRoutesOpts = (request as any).ekycRoutesOpts;
+
     const mlVision: MLVision = (request as any).ekycMlVision;
 
     const body = request.body as any;
@@ -55,12 +61,6 @@ export async function ocrHandler(opts, request, reply) {
             ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}`
             : `${opts.serverUrl}/uploads/public/${imageId}`,
     });
-
-    try {
-        opts.onMlApiResult(result, { apiName: 'ocr', apiVersion: 'v0' });
-    } catch (err) {
-        console.trace(err);
-    }
 
     reply.send(result);
 };

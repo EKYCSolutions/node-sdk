@@ -17,14 +17,14 @@ export const manualKycUpdateSchema = {
     },
 };
 
-export async function manualKycQueryHandler(opts, request, reply) {
+export async function manualKycQueryHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
     const result = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.manualKycTable} LIMIT 1`);
 
     reply.send(result);
 };
 
-export async function manualKycUpdateHandler(opts, request, reply) {
+export async function manualKycUpdateHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
     const body = request.body as any;
     

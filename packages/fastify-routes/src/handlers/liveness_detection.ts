@@ -1,6 +1,10 @@
-import { nanoid } from 'nanoid';
+
 import { writeFileSync } from 'fs';
+
+import { nanoid } from 'nanoid';
+
 import { Sqlite } from '../sqlite.js';
+import { EkycRoutesOpts } from '../types.js';
 import { MLVision } from '@ekycsolutions/ml-vision';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
@@ -42,8 +46,9 @@ export const livenessDetectionSchema = {
 //   - else call api check liveness (livenessDetection.livenessDetection())
 // body: ["left": video, "right": video, "blink": video]
 
-export async function livenessDetectionHandler(opts, request, reply) {
+export async function livenessDetectionHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
+    const opts: EkycRoutesOpts = (request as any).ekycRoutesOpts;
     const livenessConfig = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.livenessTable} LIMIT 1`);
     
     // @ts-ignore
@@ -88,14 +93,6 @@ export async function livenessDetectionHandler(opts, request, reply) {
     const result = await mlVision.livenessDetection({
         sequences: sequences 
     });
-
-    if (opts.onMlApiResult?.apply) {
-        try {
-            opts.onMlApiResult(result, { apiName: 'liveness-detection', apiVersion: 'v0' });
-        } catch (err) {
-            console.trace(err);
-        }
-    }
 
     reply.send(result);
 };

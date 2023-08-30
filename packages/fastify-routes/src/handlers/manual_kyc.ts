@@ -1,8 +1,12 @@
-import { nanoid } from 'nanoid';
+
 import { writeFileSync } from 'fs';
+
+import { nanoid } from 'nanoid';
+
 import { Sqlite } from '../sqlite.js';
-import { MLVision, ManualKycParams, OcrObjectType } from '@ekycsolutions/ml-vision';
+import { EkycRoutesOpts } from '../types.js';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
+import { MLVision, ManualKycParams, OcrObjectType } from '@ekycsolutions/ml-vision';
 
 export const manualKycSchema = {
     response: {
@@ -72,9 +76,10 @@ async function map_file_upload(opts, fileName, file): Promise<string> {
         : `${opts.serverUrl}/uploads/public/${fileName}`;
 }
 
-export async function manualKycHandler(opts, request, reply) {
+export async function manualKycHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
     const mlVision: MLVision = (request as any).ekycMlVision;
+    const opts: EkycRoutesOpts = (request as any).ekycRoutesOpts;
     const body = request.body as any;
     const checks = body.checks;
     const videos = body.videos;
@@ -132,14 +137,6 @@ export async function manualKycHandler(opts, request, reply) {
     }
 
     const result = await mlVision.manualKyc(requestBody);
-
-    if (opts.onMlApiResult?.apply) {
-        try {
-            opts.onMlApiResult(result, { apiName: 'manual-kyc', apiVersion: 'v0' });
-        } catch (err) {
-            console.trace(err);
-        }
-    }
 
     reply.send(result);
 };

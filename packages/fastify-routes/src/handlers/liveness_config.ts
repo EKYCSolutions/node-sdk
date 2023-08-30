@@ -17,14 +17,14 @@ export const livenessUpdateSchema = {
     },
 };
 
-export async function livenessQueryHandler(opts, request, reply) {
+export async function livenessQueryHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
     const result = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.livenessTable} LIMIT 1`);
 
     reply.send(result);
 };
 
-export async function livenessUpdateHandler(opts, request, reply) {
+export async function livenessUpdateHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
     const body = request.body as any;
     

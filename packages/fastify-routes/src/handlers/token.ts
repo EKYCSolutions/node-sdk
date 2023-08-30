@@ -11,7 +11,7 @@ export const tokenCreateSchema = {
   },
 };
 
-export async function tokenCreateHandler(_opts, request: FastifyRequest, reply) {
+export async function tokenCreateHandler(request: FastifyRequest, reply) {
   const sqliteDb: Sqlite = (request as any).sqliteDb;
 
   const token = nanoid(256);
@@ -24,7 +24,7 @@ export async function tokenCreateHandler(_opts, request: FastifyRequest, reply) 
   reply.send(token);
 }
 
-export async function tokenDeleteHandler(_opts, request: FastifyRequest, reply) {
+export async function tokenDeleteHandler(request: FastifyRequest, reply) {
   const sqliteDb: Sqlite = (request as any).sqliteDb;
 
   await sqliteDb.runQueryRecord(`delete from ${sqliteDb.apiTokenTable} where token = ?`, [(request.body as any).token.value]);

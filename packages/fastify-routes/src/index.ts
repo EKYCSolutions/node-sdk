@@ -63,6 +63,18 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
   };
 
   const preSerialization = async (req, reply, payload, done) => {
+    if (opts?.onMlApiResult?.apply) {
+      const apiName = req.url.split('/')[2];
+
+      await opts.onMlApiResult(
+        payload as any,
+        {
+          apiName,
+          apiVersion: apiMetadata[apiName][0].versionName,
+        }
+      );
+    }
+
     if (opts?.postMlRequestBeforeSend?.apply) {
       const apiName = req.url.split('/')[2];
 
@@ -86,15 +98,15 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     url: '/v0/token',
     method: ['POST'],
     schema: tokenCreateSchema,
+    handler: tokenCreateHandler,
     preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
-    handler: async (request, reply) => tokenCreateHandler(opts, request, reply),
   });
   
   fastify.route({
     url: '/v0/token',
     method: ['DELETE'],
+    handler: tokenDeleteHandler,
     preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
-    handler: async (request, reply) => tokenDeleteHandler(opts, request, reply),
   });
 
   fastify.route({
@@ -102,8 +114,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: ocrSchema,
     preSerialization,
+    handler: ocrHandler,
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
-    handler: async (request, reply) => ocrHandler(opts, request, reply),
   });
 
   fastify.route({
@@ -111,8 +123,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: faceCompareSchema,
     preSerialization,
+    handler: faceCompareHandler,
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
-    handler: async (request, reply) => faceCompareHandler(opts, request, reply),
   });
 
   fastify.route({
@@ -120,8 +132,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: idDetectionSchema,
     preSerialization,
+    handler: idDetectionHandler,
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
-    handler: async (request, reply) => idDetectionHandler(opts, request, reply),
   });
   
   fastify.route({
@@ -129,8 +141,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: livenessDetectionSchema,
     preSerialization,
+    handler: livenessDetectionHandler,
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
-    handler: async (request, reply) => livenessDetectionHandler(opts, request, reply),
   });
 
   fastify.route({
@@ -138,15 +150,15 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: livenessUpdateSchema,
     preSerialization,
+    handler: livenessUpdateHandler,
     preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
-    handler: async (request, reply) => livenessUpdateHandler(opts, request, reply),
   });
 
   fastify.route({
     url: '/v0/liveness-config',
     method: ['GET'],
     preSerialization,
-    handler: async (request, reply) => livenessQueryHandler(opts, request, reply),
+    handler: livenessQueryHandler,
   });
 
   fastify.route({
@@ -154,15 +166,15 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: manualKycUpdateSchema,
     preSerialization,
+    handler: manualKycUpdateHandler,
     preHandler: applyMiddies([Middleware.adminApiKeyGuard]),
-    handler: async (request, reply) => manualKycUpdateHandler(opts, request, reply),
   });
 
   fastify.route({
     url: '/v0/manual-kyc-config',
     method: ['GET'],
     preSerialization,
-    handler: async (request, reply) => manualKycQueryHandler(opts, request, reply),
+    handler: manualKycQueryHandler,
   });
 
   fastify.route({
@@ -170,8 +182,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: manualKycSchema,
     preSerialization,
+    handler: manualKycHandler,
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
-    handler: async (request, reply) => manualKycHandler(opts, request, reply),
   });
 
   next();
