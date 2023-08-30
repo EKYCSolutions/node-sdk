@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { Sqlite } from '../sqlite.js';
 import { EkycRoutesOpts } from '../types.js';
 import { MLVision } from '@ekycsolutions/ml-vision';
+import { putMlReqArgs } from '../utils/fastify-context.js';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
 export const livenessDetectionSchema = {
@@ -89,10 +90,12 @@ export async function livenessDetectionHandler(request, reply) {
             checks: check.value
         });
     }
+
+    const requestBody = { sequences };
     
-    const result = await mlVision.livenessDetection({
-        sequences: sequences 
-    });
+    const result = await mlVision.livenessDetection(requestBody);
+    
+    putMlReqArgs(this, request, requestBody);
 
     reply.send(result);
 };

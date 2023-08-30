@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 
 import { EkycRoutesOpts } from '../types.js';
 import { MLVision } from '@ekycsolutions/ml-vision';
+import { putMlReqArgs } from '../utils/fastify-context.js';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
 export const faceCompareSchema = {
@@ -40,15 +41,18 @@ export async function faceCompareHandler(request, reply) {
         writeFileSync(`/tmp/ekyc-uploads/${imageId}.1`, await body.faceImage1.toBuffer());
     }
 
-    const result = await mlVision.faceCompare({
+    const requestBody = {
         faceImage0Url: opts.fileStorageDriver === 's3'
             ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}.0`
             : `${opts.serverUrl}/uploads/public/${imageId}.0`,
         faceImage1Url: opts.fileStorageDriver === 's3'
             ? `${opts.s3.scheme}://s3.${opts.s3.region}.${opts.s3.host}/${opts.s3.bucket}/ekyc-uploads/${imageId}.1`
             : `${opts.serverUrl}/uploads/public/${imageId}.1`,
-    });
+    };
+
+    const result = await mlVision.faceCompare(requestBody);
+
+    putMlReqArgs(this, request, requestBody);
 
     reply.send(result);
 };
-

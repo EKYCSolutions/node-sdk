@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 
 import { Sqlite } from '../sqlite.js';
 import { EkycRoutesOpts } from '../types.js';
+import { putMlReqArgs } from '../utils/fastify-context.js';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 import { MLVision, ManualKycParams, OcrObjectType } from '@ekycsolutions/ml-vision';
 
@@ -138,6 +139,7 @@ export async function manualKycHandler(request, reply) {
 
     const result = await mlVision.manualKyc(requestBody);
 
+    putMlReqArgs(this, request, requestBody);
+
     reply.send(result);
 };
-
