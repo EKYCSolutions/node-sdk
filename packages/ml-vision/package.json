@@ -38,7 +38,7 @@
     "axios": "^1.4.0"
   },
   "peerDependencies": {
-    "@ekycsolutions/client": ">=0.0.0"
+    "@ekycsolutions/client": ">=0.5.0 < 0.6.0"
   },
   "devDependencies": {
     "@ekycsolutions/client": "^0.5.2-alpha.4"
