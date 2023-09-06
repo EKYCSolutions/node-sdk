@@ -4,7 +4,7 @@ import { writeFileSync } from 'fs';
 import { nanoid } from 'nanoid';
 
 import { EkycRoutesOpts } from '../types.js';
-import { putMlReqArgs } from '../utils/fastify-context.js';
+import { putMlReqArgs } from '../utils/context.js';
 import { MLVision, OcrObjectType } from '@ekycsolutions/ml-vision';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
@@ -63,9 +63,9 @@ export async function ocrHandler(request, reply) {
             : `${opts.serverUrl}/uploads/public/${imageId}`,
     };
 
-    const result = await mlVision.ocr(requestBody);
+    const [result, _] = await Promise.all([mlVision.ocr(requestBody), putMlReqArgs(this, request, requestBody)]);
 
-    putMlReqArgs(this, request, requestBody);
+    console.log(result);
 
     reply.send(result);
 };

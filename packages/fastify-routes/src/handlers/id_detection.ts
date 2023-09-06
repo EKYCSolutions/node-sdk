@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 
 import { EkycRoutesOpts } from '../types.js';
 import { MLVision } from '@ekycsolutions/ml-vision';
-import { putMlReqArgs } from '../utils/fastify-context.js';
+import { putMlReqArgs } from '../utils/context.js';
 import { mlApiRequestResponseSchema } from '../responses/ml_api_request.js'
 
 export const idDetectionSchema = {
@@ -43,9 +43,7 @@ export async function idDetectionHandler(request, reply) {
             : `${opts.serverUrl}/uploads/public/${imageId}`,
     };
 
-    const result = await mlVision.idDetection(requestBody);
-
-    putMlReqArgs(this, request, requestBody);
+    const result = await Promise.all([mlVision.idDetection(requestBody), putMlReqArgs(this, request, requestBody)]);
 
     reply.send(result);
 };
