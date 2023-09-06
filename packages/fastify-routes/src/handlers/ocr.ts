@@ -65,6 +65,6 @@ export async function ocrHandler(request, reply) {
 
     const [result, _] = await Promise.all([mlVision.ocr(requestBody), putMlReqArgs(this, request, requestBody)]);
 
-    reply.send(result);
+    return result;
 };
 

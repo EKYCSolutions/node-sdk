@@ -139,5 +139,5 @@ export async function manualKycHandler(request, reply) {
 
     const [result, _] = await Promise.all([mlVision.manualKyc(requestBody), putMlReqArgs(this, request, requestBody)]);
 
-    reply.send(result);
+    return result;
 };

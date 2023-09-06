@@ -45,6 +45,6 @@ export async function idDetectionHandler(request, reply) {
 
     const result = await Promise.all([mlVision.idDetection(requestBody), putMlReqArgs(this, request, requestBody)]);
 
-    reply.send(result);
+    return result;
 };
 

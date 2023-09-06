@@ -52,5 +52,5 @@ export async function faceCompareHandler(request, reply) {
 
     const result = await Promise.all([mlVision.faceCompare(requestBody), putMlReqArgs(this, request, requestBody)]);
 
-    reply.send(result);
+    return result;
 };
