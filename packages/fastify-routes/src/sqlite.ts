@@ -3,6 +3,7 @@ import sqlite3 from "sqlite3";
 export class Sqlite {
     public readonly dbConn: sqlite3.Database;
     public readonly apiTokenTable = 'api_token';
+    public readonly apiReqArgTable = 'api_req_args';
     public readonly livenessTable = 'liveness_config';
     public readonly manualKycTable = 'manual_kyc_config';
 
@@ -23,6 +24,15 @@ export class Sqlite {
         db.run(`CREATE TABLE IF NOT EXISTS ${this.apiTokenTable} (
             token TEXT PRIMARY KEY
         )`, [], (err) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+
+        db.run(`create table if not exists ${this.apiReqArgTable} (
+            request_id text primary key,
+            args text
+        )`, [], err => {
             if (err) {
                 console.log(err);
             }
