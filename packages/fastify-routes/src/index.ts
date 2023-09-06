@@ -2,6 +2,7 @@
 import { mkdirSync } from 'fs';
 
 import fp from 'fastify-plugin';
+import { nanoid } from 'nanoid';
 import cors from '@fastify/cors';
 import { FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
@@ -12,7 +13,7 @@ import { EkycClient, EkycClientOptions } from '@ekycsolutions/client';
 import { Sqlite } from './sqlite.js';
 import { EkycRoutesOpts } from './types.js';
 import { apiMetadata } from './api-metadata.js';
-import { getMlReqArgs } from './utils/fastify-context.js';
+import { getMlReqArgs } from './utils/context.js';
 import { ocrSchema, ocrHandler } from './handlers/ocr.js';
 import { Middleware, middlewares } from './middlewares/index.js';
 import { manualKycHandler, manualKycSchema } from './handlers/manual_kyc.js';
@@ -34,6 +35,8 @@ export const ekycPlugin = fp(async (fastify: FastifyInstance, opts: EkycClientOp
   fastify.decorate('ekycClient', ekycClient);
   fastify.decorate('ekycMlVision', mlVision);
 
+  fastify.decorateRequest('reqId', '');
+
   fastify.addHook('preHandler', (req: any, _, next) => {
     req.sqliteDb = sqliteDb;
     req.ekycClient = ekycClient;
@@ -53,6 +56,8 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
   fastify.decorate('ekycRoutesOpts', opts);
 
   fastify.addHook('preHandler', (req: any, _, next) => {
+    req.reqId = nanoid(32);
+
     req.ekycRoutesOpts = opts;
     next();
   });
@@ -69,7 +74,7 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     const mlReqMetadata = {
       apiName,
       apiVersion: apiMetadata[apiName][0].versionName,
-      mlReqArgs: getMlReqArgs(req),
+      mlReqArgs: await getMlReqArgs(req),
     };
 
     if (opts?.onMlApiResult?.apply) {
