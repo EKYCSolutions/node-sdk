@@ -33,9 +33,18 @@ export interface LivenessDetectionParams extends CommonMLVisionParams {
 }
 
 export interface ManualKycParams extends CommonMLVisionParams {
-  sequences: LivenessDetectionSequence[];
-  faceImageUrl: string;
   ocrImageUrl: string;
+  faceImageUrl: string;
+  faceTurnLeftImageUrl: string;
+  faceTurnRightImageUrl: string;
   isRaw?: 'yes' | 'no';
   objectType: OcrObjectType;
+}
+
+export interface ExpressKycParams extends CommonMLVisionParams {
+  ocrImageUrl: string;
+  faceImageUrl: string;
+  isRaw?: 'yes' | 'no';
+  objectType: OcrObjectType;
+  sequences: LivenessDetectionSequence[];
 }

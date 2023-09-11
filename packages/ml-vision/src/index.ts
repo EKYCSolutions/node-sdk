@@ -7,6 +7,7 @@ import { EkycClient } from '@ekycsolutions/client/dist/node';
 import {
   OcrParams,
   ManualKycParams,
+  ExpressKycParams,
   FaceCompareParams,
   IdDetectionParams,
   LivenessDetectionParams,
@@ -93,8 +94,36 @@ export class MLVision {
     return await this.ekycClient.makeRequest('v0/liveness-detection', requestOpts);
   }
 
-  public async manualKyc({ isRaw, ocrImageUrl, faceImageUrl, objectType, sequences }: Readonly<ManualKycParams>): Promise<ApiResult> {
+  public async manualKyc({
+    isRaw,
+    objectType,
+    ocrImageUrl,
+    faceImageUrl,
+    faceTurnLeftImageUrl,
+    faceTurnRightImageUrl,
+  }: Readonly<ManualKycParams>): Promise<ApiResult> {
+    const formData = this.ekycClient.prepareFormData({
+      api: 'manual-kyc',
+      version: 'v0',
+    });
 
+    formData.append('is_raw', isRaw);
+    formData.append('object_type', objectType);
+    formData.append('ocr_image_url', ocrImageUrl);
+    formData.append('face_image_url', faceImageUrl);
+    formData.append('face_turn_left_image_url', faceTurnLeftImageUrl);
+    formData.append('face_turn_right_image_url', faceTurnRightImageUrl);
+
+    const requestOpts = new Options({
+      body: formData,
+      method: 'POST',
+      headers: formData.getHeaders(),
+    });
+
+    return await this.ekycClient.makeRequest('v0/manual-kyc', requestOpts);
+  }
+
+  public async expressKyc({ isRaw, ocrImageUrl, faceImageUrl, objectType, sequences }: Readonly<ExpressKycParams>): Promise<ApiResult> {
     const formData = this.ekycClient.prepareFormData({
       api: 'manual-kyc',
       version: 'v0',
@@ -118,6 +147,6 @@ export class MLVision {
       headers: formData.getHeaders(),
     });
 
-    return await this.ekycClient.makeRequest('v0/manual-kyc', requestOpts);
+    return await this.ekycClient.makeRequest('v0/express-kyc', requestOpts);
   }
 }

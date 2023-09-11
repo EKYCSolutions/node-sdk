@@ -3,9 +3,9 @@ import sqlite3 from "sqlite3";
 export class Sqlite {
     public readonly dbConn: sqlite3.Database;
     public readonly apiTokenTable = 'api_token';
+    public readonly kycConfigTable = 'kyc_config';
     public readonly apiReqArgTable = 'api_req_args';
     public readonly livenessTable = 'liveness_config';
-    public readonly manualKycTable = 'manual_kyc_config';
 
     constructor(sqliteDb: string) {
         this.dbConn = new sqlite3.Database(sqliteDb, (err) => {
@@ -19,7 +19,7 @@ export class Sqlite {
         const db = this.dbConn;
 
         this.createToggleFeatureTable(this.livenessTable, db);
-        this.createToggleFeatureTable(this.manualKycTable, db);
+        this.createToggleFeatureTable(this.kycConfigTable, db);
 
         db.run(`CREATE TABLE IF NOT EXISTS ${this.apiTokenTable} (
             token TEXT PRIMARY KEY

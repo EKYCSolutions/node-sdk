@@ -19,7 +19,7 @@ export const manualKycUpdateSchema = {
 
 export async function manualKycQueryHandler(request, reply) {
     const sqliteDb: Sqlite = (request as any).sqliteDb;
-    const result = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.manualKycTable} LIMIT 1`);
+    const result = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.kycConfigTable} LIMIT 1`);
 
     reply.send(result);
 };
@@ -29,11 +29,11 @@ export async function manualKycUpdateHandler(request, reply) {
     const body = request.body as any;
     
     await sqliteDb.runQueryRecord(
-        `UPDATE ${sqliteDb.manualKycTable} SET enable = ?`, 
+        `UPDATE ${sqliteDb.kycConfigTable} SET enable = ?`, 
         [body.enable]
     );
    
-    const result = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.manualKycTable} LIMIT 1`);
+    const result = await sqliteDb.queryRecord(`SELECT enable FROM ${sqliteDb.kycConfigTable} LIMIT 1`);
 
     reply.send(result);
 };
