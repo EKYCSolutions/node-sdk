@@ -93,7 +93,7 @@ export async function livenessDetectionHandler(request, reply) {
 
     const requestBody = { sequences };
     
-    const result = await Promise.all([mlVision.livenessDetection(requestBody), putMlReqArgs(this, request, requestBody)]);
+    const [result, _] = await Promise.all([mlVision.livenessDetection(requestBody), putMlReqArgs(this, request, requestBody)]);
 
     return result;
 };

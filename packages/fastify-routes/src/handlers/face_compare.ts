@@ -50,7 +50,7 @@ export async function faceCompareHandler(request, reply) {
             : `${opts.serverUrl}/uploads/public/${imageId}.1`,
     };
 
-    const result = await Promise.all([mlVision.faceCompare(requestBody), putMlReqArgs(this, request, requestBody)]);
+    const [result, _] = await Promise.all([mlVision.faceCompare(requestBody), putMlReqArgs(this, request, requestBody)]);
 
     return result;
 };

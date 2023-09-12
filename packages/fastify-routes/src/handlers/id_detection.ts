@@ -43,7 +43,7 @@ export async function idDetectionHandler(request, reply) {
             : `${opts.serverUrl}/uploads/public/${imageId}`,
     };
 
-    const result = await Promise.all([mlVision.idDetection(requestBody), putMlReqArgs(this, request, requestBody)]);
+    const [result, _] = await Promise.all([mlVision.idDetection(requestBody), putMlReqArgs(this, request, requestBody)]);
 
     return result;
 };
