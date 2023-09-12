@@ -17,6 +17,7 @@ import { getMlReqArgs } from './utils/context.js';
 import { ocrSchema, ocrHandler } from './handlers/ocr.js';
 import { Middleware, middlewares } from './middlewares/index.js';
 import { manualKycHandler, manualKycSchema } from './handlers/manual_kyc.js';
+import { expressKycHandler, expressKycSchema } from './handlers/express_kyc.js';
 import { faceCompareSchema, faceCompareHandler } from './handlers/face_compare.js';
 import { idDetectionSchema, idDetectionHandler } from './handlers/id_detection.js';
 import { tokenCreateHandler, tokenCreateSchema, tokenDeleteHandler } from './handlers/token.js';
@@ -184,6 +185,15 @@ export const ekycRoutes = fp(async (fastify: FastifyInstance, opts: EkycRoutesOp
     method: ['POST'],
     schema: manualKycSchema,
     handler: manualKycHandler,
+    preSerialization: onBeforeMlResultSend,
+    preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
+  });
+
+  fastify.route({
+    url: '/v0/express-kyc',
+    method: ['POST'],
+    schema: expressKycSchema,
+    handler: expressKycHandler,
     preSerialization: onBeforeMlResultSend,
     preHandler: applyMiddies([Middleware.tokenGuard, Middleware.preMlRequest]),
   });
